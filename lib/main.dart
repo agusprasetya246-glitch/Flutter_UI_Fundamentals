@@ -78,7 +78,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Course Explorer',
-      home: const Tahap6Page(), // Ubah ke Tahap6Page
+      home: const Tahap7HomePage(), // Ubah ke Tahap7HomePage
     );
   }
 }
@@ -773,6 +773,75 @@ class Tahap6Page extends StatelessWidget {
                 border: OutlineInputBorder(),
                 labelText: 'Ketik sesuatu di sini (Pancing Keyboard)',
               ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+// --- TAHAP 7: Navigasi Dasar ---
+
+// Halaman Pertama (Home)
+class Tahap7HomePage extends StatelessWidget {
+  const Tahap7HomePage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Tahap 7: Home')),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text(
+              '2415051039 - Agus Prasetya',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton(
+              onPressed: () {
+                // TAHAP 7: Menggunakan Navigator.push untuk pindah ke halaman detail
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const Tahap7DetailPage(),
+                  ),
+                );
+              },
+              child: const Text('Buka Detail Page'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// Halaman Kedua (Detail)
+class Tahap7DetailPage extends StatelessWidget {
+  const Tahap7DetailPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Tahap 7: Detail')),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text(
+              '2415051039 - Agus Prasetya',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+            ),
+            const Text('Ini adalah Halaman Detail'),
+            const SizedBox(height: 24),
+            ElevatedButton(
+              onPressed: () {
+                // TAHAP 7: Menggunakan Navigator.pop untuk kembali ke halaman sebelumnya
+                Navigator.pop(context);
+              },
+              child: const Text('Kembali (Pop)'),
             ),
           ],
         ),
