@@ -78,7 +78,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Course Explorer',
-      home: const Tahap2Page(), // Ubah ke Tahap2Page
+      home: const Tahap3Page(), // Ubah ke Tahap3Page
     );
   }
 }
@@ -433,6 +433,125 @@ class Tahap2Page extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+// --- TAHAP 3: Komponen Layout Sesuai Breakpoint ---
+
+class CompactLayout extends StatelessWidget {
+  const CompactLayout({super.key});
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: Colors.blue.shade50,
+      alignment: Alignment.center,
+      child: const Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.phone_android, size: 80, color: Colors.blue),
+          SizedBox(height: 16),
+          Text(
+            'COMPACT LAYOUT',
+            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+          ),
+          Text('< 600 px (Smartphone)'),
+          SizedBox(height: 16),
+          Text(
+            '2415051039 - Agus Prasetya',
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class MediumLayout extends StatelessWidget {
+  const MediumLayout({super.key});
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: Colors.purple.shade50,
+      alignment: Alignment.center,
+      child: const Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.tablet_mac, size: 80, color: Colors.purple),
+          SizedBox(width: 24),
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'MEDIUM LAYOUT',
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              ),
+              Text('600 - 839 px (Tablet Portrait)'),
+              SizedBox(height: 16),
+              Text(
+                '2415051039 - Agus Prasetya',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class ExpandedLayout extends StatelessWidget {
+  const ExpandedLayout({super.key});
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: Colors.teal.shade50,
+      alignment: Alignment.center,
+      child: const Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          Icon(Icons.laptop_mac, size: 120, color: Colors.teal),
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'EXPANDED LAYOUT',
+                style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
+              ),
+              Text('>= 840 px (Desktop / Tablet Landscape)'),
+              SizedBox(height: 24),
+              Text(
+                'NIM: 2415051039 | Nama: Agus Prasetya',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// Halaman utama untuk Tahap 3
+class Tahap3Page extends StatelessWidget {
+  const Tahap3Page({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Tahap 3: Breakpoints')),
+      // TAHAP 3: LayoutBuilder
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          if (constraints.maxWidth < 600) {
+            return const CompactLayout(); // Panggil layar smartphone
+          } else if (constraints.maxWidth < 840) {
+            return const MediumLayout(); // Panggil layar tablet
+          } else {
+            return const ExpandedLayout(); // Panggil layar lebar
+          }
+        },
       ),
     );
   }
