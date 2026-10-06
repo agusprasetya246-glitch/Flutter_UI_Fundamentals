@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
 
+// TAHAP 12: Import untuk JSON dan pembacaan asset lokal
+import 'dart:convert';
+
+import 'package:flutter/services.dart' show rootBundle;
+
 const String studentName = 'Agus Prasetya';
 const String studentId = '2415051039';
 
@@ -23,6 +28,16 @@ final List<Map<String, dynamic>> topics = [
     'done': false,
   }, // Tambahan item agar bisa di-scroll
 ];
+
+// TAHAP 12: Fungsi untuk membaca file JSON
+Future<Map<String, dynamic>> loadStudentData() async {
+  // Membaca file teks dari lokal asset
+  final jsonString = await rootBundle.loadString(
+    'assets/data/student_data.json',
+  );
+  // Mengubah teks string menjadi objek Map di Dart
+  return jsonDecode(jsonString) as Map<String, dynamic>;
+}
 
 void main() {
   runApp(const MyApp());
