@@ -78,7 +78,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Course Explorer',
-      home: const Tahap5Page(), // Ubah ke Tahap5Page
+      home: const Tahap6Page(), // Ubah ke Tahap6Page
     );
   }
 }
@@ -717,6 +717,61 @@ class Tahap5Page extends StatelessWidget {
                     },
                   );
                 },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// Halaman sementara untuk Tahap 6
+class Tahap6Page extends StatelessWidget {
+  const Tahap6Page({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Tahap 6: Scroll & Keyboard')),
+      // TAHAP 6: Membungkus Column dengan SingleChildScrollView
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            const Text(
+              '2415051039 - Agus Prasetya',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+            ),
+            const SizedBox(height: 24),
+
+            // Elemen kosong untuk menghabiskan ruang layar
+            Container(
+              height: 400,
+              decoration: BoxDecoration(
+                color: Colors.blue.shade100,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              alignment: Alignment.center,
+              child: const Text('Profil Placeholder (Tinggi 400px)'),
+            ),
+            const SizedBox(height: 24),
+            Container(
+              height: 200,
+              decoration: BoxDecoration(
+                color: Colors.green.shade100,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              alignment: Alignment.center,
+              child: const Text('Statistik Placeholder (Tinggi 200px)'),
+            ),
+            const SizedBox(height: 24),
+
+            // TextField ini akan berada di bagian paling bawah
+            const TextField(
+              decoration: InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: 'Ketik sesuatu di sini (Pancing Keyboard)',
               ),
             ),
           ],
