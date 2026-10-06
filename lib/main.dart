@@ -78,7 +78,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Course Explorer',
-      home: const Tahap7HomePage(), // Ubah ke Tahap7HomePage
+      home: const Tahap8ListPage(), // Ubah ke Tahap8ListPage
     );
   }
 }
@@ -845,6 +845,148 @@ class Tahap7DetailPage extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+// --- TAHAP 8: Passing Data ---
+
+// Halaman Penerima Data (Detail)
+class Tahap8DetailPage extends StatelessWidget {
+  final Map<String, dynamic> course; // Variabel penampung data
+
+  const Tahap8DetailPage({super.key, required this.course});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text(course['title'] as String)),
+      body: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Identitas Mahasiswa wajib ada di detail
+            const Text(
+              '2415051039 - Agus Prasetya',
+              style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey),
+            ),
+            const Divider(),
+            const SizedBox(height: 16),
+
+            // Menampilkan data yang ditangkap
+            Text(
+              course['title'] as String,
+              style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Kode: ${course['code']}',
+              style: const TextStyle(fontSize: 18),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Bobot: ${course['credits']} SKS',
+              style: const TextStyle(fontSize: 18),
+            ),
+            const SizedBox(height: 24),
+
+            // Tombol kembali (Tahap 7)
+            ElevatedButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Kembali ke Daftar'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// Halaman Pengirim Data (List) menggunakan JSON
+class Tahap8ListPage extends StatefulWidget {
+  const Tahap8ListPage({super.key});
+
+  @override
+  State<Tahap8ListPage> createState() => _Tahap8ListPageState();
+}
+
+class _Tahap8ListPageState extends State<Tahap8ListPage> {
+  // Variabel penampung data Future
+  late Future<Map<String, dynamic>> dataFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    // Memanggil fungsi global yang sudah Anda buat di atas
+    dataFuture = loadStudentData();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Tahap 8: Passing Data (JSON)')),
+      body: Column(
+        children: [
+          const Padding(
+            padding: EdgeInsets.all(16.0),
+            child: Text(
+              'NIM: 2415051039 | Nama: Agus Prasetya',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ),
+          Expanded(
+            child: FutureBuilder<Map<String, dynamic>>(
+              future: dataFuture,
+              builder: (context, snapshot) {
+                // Menangani state loading
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                // Menangani error jika JSON gagal dimuat
+                if (snapshot.hasError) {
+                  return const Center(child: Text('Error memuat data JSON'));
+                }
+
+                // Mengekstrak array 'courses' dari objek JSON
+                final courses = snapshot.data!['courses'] as List<dynamic>;
+
+                return ListView.builder(
+                  itemCount: courses.length,
+                  itemBuilder: (context, index) {
+                    final course = courses[index] as Map<String, dynamic>;
+                    return Card(
+                      margin: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 8,
+                      ),
+                      child: ListTile(
+                        title: Text(
+                          course['title'] as String,
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        subtitle: Text(
+                          '${course['code']} • ${course['credits']} SKS',
+                        ),
+                        trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                        onTap: () {
+                          // TAHAP 8: Melempar data spesifik JSON ke halaman detail
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  Tahap8DetailPage(course: course),
+                            ),
+                          );
+                        },
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
   }
