@@ -77,9 +77,8 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Flutter UI Fundamentals',
-      // Mengarahkan aplikasi untuk langsung membuka DashboardPage (Tahap 13 & 14)
-      home: const DashboardPage(),
+      title: 'Course Explorer',
+      home: const Tahap1Page(), // Ubah sementara ke sini
     );
   }
 }
@@ -351,3 +350,30 @@ class _DashboardPageState extends State<DashboardPage> {
 }
 // Praktikum Flutter UI Fundamentals Selesai.
 // Menjawab Debugging Challenge Kasus A, B, C pada lembar laporan.
+
+// Halaman sementara untuk Tahap 1
+class Tahap1Page extends StatelessWidget {
+  const Tahap1Page({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Tahap 1: Masalah Layout')),
+      body: Row(
+        children: [
+          // KODE BENAR: Menggunakan Expanded
+          Expanded(
+            child: Container(
+              color: Colors.green.shade100,
+              padding: const EdgeInsets.all(16),
+              child: const Text(
+                '2415051039 - Agus Prasetya',
+                style: TextStyle(fontSize: 18),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
