@@ -78,7 +78,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Course Explorer',
-      home: const Tahap4Page(), // Ubah ke Tahap4Page
+      home: const Tahap5Page(), // Ubah ke Tahap5Page
     );
   }
 }
@@ -640,6 +640,84 @@ class Tahap4Page extends StatelessWidget {
                     ),
                   )
                   .toList(),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// Halaman sementara untuk Tahap 5
+class Tahap5Page extends StatelessWidget {
+  const Tahap5Page({super.key});
+
+  // TAHAP 5: Fungsi penentu jumlah kolom berdasarkan breakpoint lebar layar
+  int columnsFor(double width) {
+    if (width < 600) return 1; // Compact -> 1 Kolom
+    if (width < 840) return 2; // Medium -> 2 Kolom
+    return 3; // Expanded -> 3 Kolom
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // Data statis (dummy) dari pertemuan sebelumnya
+    final List<Map<String, dynamic>> courses = [
+      {"code": "MOB01", "title": "Git & GitHub", "credits": 2},
+      {"code": "MOB02", "title": "Dart Fundamentals", "credits": 2},
+      {"code": "MOB03", "title": "Flutter UI", "credits": 3},
+      {"code": "MOB04", "title": "Navigation", "credits": 2},
+      {"code": "MOB05", "title": "State Management", "credits": 3},
+      {"code": "MOB06", "title": "API & Database", "credits": 3},
+    ];
+
+    return Scaffold(
+      appBar: AppBar(title: const Text('Tahap 5: GridView Responsif')),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Header Identitas
+            const Text(
+              '2415051039 - Agus Prasetya',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            ),
+            const SizedBox(height: 16),
+
+            // GridView dibungkus Expanded & LayoutBuilder
+            Expanded(
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  return GridView.builder(
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: columnsFor(
+                        constraints.maxWidth,
+                      ), // Panggil fungsi penentu kolom
+                      crossAxisSpacing: 12,
+                      mainAxisSpacing: 12,
+                      childAspectRatio: 3, // Mengatur rasio tinggi vs lebar agar kotak tidak terlalu tinggi
+                    ),
+                    itemCount: courses.length,
+                    itemBuilder: (context, index) {
+                      final course = courses[index];
+                      return Card(
+                        elevation: 2,
+                        color: Colors.blue.shade50,
+                        child: ListTile(
+                          title: Text(
+                            course['title'] as String,
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          subtitle: Text(
+                            '${course['code']} • ${course['credits']} SKS',
+                          ),
+                        ),
+                      );
+                    },
+                  );
+                },
+              ),
             ),
           ],
         ),
