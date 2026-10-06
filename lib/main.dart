@@ -77,148 +77,9 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: Scaffold(
-        appBar: AppBar(title: const Text('Flutter UI Fundamentals')),
-        body: Center(
-          // Membungkus seluruh konten dengan Padding agar tidak menempel di tepi layar
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // Tahap 7: Membungkus profil dengan Card dan menambahkan Padding di dalamnya
-                Card(
-                  elevation: 4, // Memberikan efek bayangan
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(24.0),
-                    child: Column(
-                      children: [
-                        const CircleAvatar(
-                          radius: 46,
-                          backgroundImage: AssetImage(
-                            'assets/images/profile.jpg',
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        Text(
-                          studentName,
-                          style: const TextStyle(
-                            fontSize: 22,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        Text(studentId),
-                        const SizedBox(height: 8),
-                        const Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(Icons.phone_android),
-                            SizedBox(width: 8),
-                            Text('Mobile Programming Student'),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ), // Akhir dari Card Profil
-
-                const SizedBox(height: 24),
-                Row(
-                  children: [
-                    buildStatCard('8', 'Widget', Icons.widgets),
-                    const SizedBox(width: 8), // Jarak antar kartu
-                    buildStatCard('4', 'Layout', Icons.view_quilt),
-                    const SizedBox(width: 8),
-                    buildStatCard('1', 'State', Icons.sync),
-                  ],
-                ),
-                // TAHAP 10: Mengganti GreetingCard dengan ListView.builder yang dibungkus Expanded
-                const SizedBox(height: 24),
-
-                Builder(
-                  builder: (context) {
-                    final int completed = topics
-                        .where((item) => item['done'] == true)
-                        .length;
-                    return Text(
-                      'Progress: $completed dari ${topics.length} topik selesai',
-                      style: const TextStyle(
-                        fontSize: 14,
-                        color: Colors.blueGrey,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    );
-                  },
-                ),
-                const SizedBox(height: 12),
-
-                const Text(
-                  'Daftar Materi',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 8),
-
-                // Wajib menggunakan Expanded agar ListView mendapatkan batas ruang (height) di dalam Column
-                Expanded(
-                  child: ListView.builder(
-                    itemCount: topics
-                        .length, // Jumlah iterasi berdasarkan panjang data
-                    itemBuilder: (context, index) {
-                      final item = topics[index];
-                      // TAHAP 11: Bungkus ListTile dengan Card
-                      return Card(
-                        margin: const EdgeInsets.symmetric(
-                          horizontal: 4,
-                          vertical: 6,
-                        ),
-                        elevation: 1,
-                        shape: RoundedRectangleBorder(
-                          side: BorderSide(
-                            color: item['done'] == true
-                                ? Colors.green.shade200
-                                : Colors.grey.shade300,
-                            width: 1,
-                          ),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: ListTile(
-                          leading: Icon(
-                            item['done'] == true
-                                ? Icons.check_circle
-                                : Icons.schedule, // Icon diubah menjadi jam untuk 'belum'
-                            color: item['done'] == true
-                                ? Colors.green
-                                : Colors.orange,
-                          ),
-                          title: Text(
-                            item['title'] as String,
-                            style: const TextStyle(fontWeight: FontWeight.w600),
-                          ),
-                          subtitle: Text(item['subtitle'] as String),
-
-                          // Menambahkan teks status di sebelah kanan
-                          trailing: Text(
-                            item['done'] == true ? 'Selesai' : 'Belum',
-                            style: TextStyle(
-                              color: item['done'] == true
-                                  ? Colors.green
-                                  : Colors.orange,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
+      title: 'Flutter UI Fundamentals',
+      // Mengarahkan aplikasi untuk langsung membuka DashboardPage (Tahap 13 & 14)
+      home: const DashboardPage(),
     );
   }
 }
@@ -290,6 +151,83 @@ class _GreetingCardState extends State<GreetingCard> {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+// TAHAP 13: Membuat halaman Dashboard berbasis StatefulWidget
+class DashboardPage extends StatefulWidget {
+  const DashboardPage({super.key});
+
+  @override
+  State<DashboardPage> createState() => _DashboardPageState();
+}
+
+class _DashboardPageState extends State<DashboardPage> {
+  // Deklarasi variabel Future menggunakan 'late'
+  late Future<Map<String, dynamic>> studentFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    // Menginisialisasi pemanggilan data SATU KALI saja saat halaman dimuat
+    studentFuture = loadStudentData();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Learning Dashboard')),
+      body: FutureBuilder<Map<String, dynamic>>(
+        future: studentFuture,
+        builder: (context, snapshot) {
+          // Menampilkan indikator loading saat menunggu data
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          // Menampilkan pesan error jika JSON gagal dibaca/rusak
+          if (snapshot.hasError) {
+            return Center(child: Text('Gagal memuat data: ${snapshot.error}'));
+          }
+
+          // Mengekstrak data JSON yang berhasil dimuat
+          final data = snapshot.data!;
+          final student = data['student'] as Map<String, dynamic>;
+          final courses = data['courses'] as List<dynamic>;
+
+          // Menampilkan data ke layar
+          return Column(
+            children: [
+              ListTile(
+                title: Text(
+                  student['name'] as String,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 20,
+                  ),
+                ),
+                subtitle: Text(student['nim'] as String),
+                leading: const CircleAvatar(child: Icon(Icons.person)),
+              ),
+              const Divider(),
+              Expanded(
+                child: ListView.builder(
+                  itemCount: courses.length,
+                  itemBuilder: (context, index) {
+                    final course = courses[index] as Map<String, dynamic>;
+                    return ListTile(
+                      title: Text(course['title'] as String),
+                      subtitle: Text(course['code'] as String),
+                      trailing: Text(course['status'] as String),
+                    );
+                  },
+                ),
+              ),
+            ],
+          );
+        },
       ),
     );
   }
