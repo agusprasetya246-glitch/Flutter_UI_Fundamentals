@@ -120,7 +120,85 @@ class MyApp extends StatelessWidget {
                     buildStatCard('1', 'State', Icons.sync),
                   ],
                 ),
-                const GreetingCard(),
+                // TAHAP 10: Mengganti GreetingCard dengan ListView.builder yang dibungkus Expanded
+                const SizedBox(height: 24),
+
+                Builder(
+                  builder: (context) {
+                    final int completed = topics
+                        .where((item) => item['done'] == true)
+                        .length;
+                    return Text(
+                      'Progress: $completed dari ${topics.length} topik selesai',
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color: Colors.blueGrey,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    );
+                  },
+                ),
+                const SizedBox(height: 12),
+
+                const Text(
+                  'Daftar Materi',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 8),
+
+                // Wajib menggunakan Expanded agar ListView mendapatkan batas ruang (height) di dalam Column
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: topics
+                        .length, // Jumlah iterasi berdasarkan panjang data
+                    itemBuilder: (context, index) {
+                      final item = topics[index];
+                      // TAHAP 11: Bungkus ListTile dengan Card
+                      return Card(
+                        margin: const EdgeInsets.symmetric(
+                          horizontal: 4,
+                          vertical: 6,
+                        ),
+                        elevation: 1,
+                        shape: RoundedRectangleBorder(
+                          side: BorderSide(
+                            color: item['done'] == true
+                                ? Colors.green.shade200
+                                : Colors.grey.shade300,
+                            width: 1,
+                          ),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: ListTile(
+                          leading: Icon(
+                            item['done'] == true
+                                ? Icons.check_circle
+                                : Icons.schedule, // Icon diubah menjadi jam untuk 'belum'
+                            color: item['done'] == true
+                                ? Colors.green
+                                : Colors.orange,
+                          ),
+                          title: Text(
+                            item['title'] as String,
+                            style: const TextStyle(fontWeight: FontWeight.w600),
+                          ),
+                          subtitle: Text(item['subtitle'] as String),
+
+                          // Menambahkan teks status di sebelah kanan
+                          trailing: Text(
+                            item['done'] == true ? 'Selesai' : 'Belum',
+                            style: TextStyle(
+                              color: item['done'] == true
+                                  ? Colors.green
+                                  : Colors.orange,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
               ],
             ),
           ),
