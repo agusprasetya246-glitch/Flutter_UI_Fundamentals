@@ -78,7 +78,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Course Explorer',
-      home: const Tahap3Page(), // Ubah ke Tahap3Page
+      home: const Tahap4Page(), // Ubah ke Tahap4Page
     );
   }
 }
@@ -552,6 +552,97 @@ class Tahap3Page extends StatelessWidget {
             return const ExpandedLayout(); // Panggil layar lebar
           }
         },
+      ),
+    );
+  }
+}
+
+// Halaman sementara untuk Tahap 4
+class Tahap4Page extends StatelessWidget {
+  const Tahap4Page({super.key});
+
+  // Fungsi helper untuk membuat kotak warna (panel)
+  Widget buildBox(String text, Color color) {
+    return Container(
+      color: color,
+      height: 100,
+      alignment: Alignment.center,
+      child: Text(
+        text,
+        style: const TextStyle(
+          fontSize: 20,
+          fontWeight: FontWeight.bold,
+          color: Colors.white,
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // Daftar keahlian (skills)
+    final List<String> skills = [
+      'Dart',
+      'Flutter',
+      'UI/UX',
+      'Git',
+      'GitHub',
+      'Firebase',
+      'State Management',
+    ];
+
+    return Scaffold(
+      appBar: AppBar(title: const Text('Tahap 4: Expanded & Wrap')),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              '2415051039 - Agus Prasetya',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            ),
+            const SizedBox(height: 24),
+
+            // TAHAP 4: Row dengan Expanded (Flex 2:1)
+            const Text(
+              '1. Expanded (Rasio Flex 2:1)',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Expanded(flex: 2, child: buildBox('Panel A (2x)', Colors.blue)),
+                const SizedBox(width: 8),
+                Expanded(
+                  flex: 1,
+                  child: buildBox('Panel B (1x)', Colors.orange),
+                ),
+              ],
+            ),
+            const SizedBox(height: 32),
+
+            // TAHAP 4: Wrap untuk kumpulan Chip
+            const Text(
+              '2. Widget Wrap',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8.0, // Jarak horizontal antar chip
+              runSpacing: 8.0, // Jarak vertikal antar baris chip
+              children: skills
+                  .map(
+                    (e) => Chip(
+                      label: Text(e),
+                      backgroundColor: Colors.blue.shade50,
+                      side: BorderSide.none,
+                    ),
+                  )
+                  .toList(),
+            ),
+          ],
+        ),
       ),
     );
   }
