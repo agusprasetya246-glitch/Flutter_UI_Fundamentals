@@ -265,8 +265,6 @@ class _DashboardPageState extends State<DashboardPage> {
                 // 2. Summary Row (Menggunakan fungsi buildStatCard dari MyApp)
                 Row(
                   children: [
-                    // Kita membuat instance dari MyApp hanya untuk memanggil fungsinya
-                    // (Secara praktik industri, fungsi ini biasanya dipisah ke file tersendiri)
                     const MyApp().buildStatCard(
                       courses.length.toString(),
                       'Topik',
@@ -351,3 +349,5 @@ class _DashboardPageState extends State<DashboardPage> {
     );
   }
 }
+// Praktikum Flutter UI Fundamentals Selesai.
+// Menjawab Debugging Challenge Kasus A, B, C pada lembar laporan.
