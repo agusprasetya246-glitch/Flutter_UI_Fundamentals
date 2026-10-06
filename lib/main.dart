@@ -197,35 +197,154 @@ class _DashboardPageState extends State<DashboardPage> {
           final student = data['student'] as Map<String, dynamic>;
           final courses = data['courses'] as List<dynamic>;
 
-          // Menampilkan data ke layar
-          return Column(
-            children: [
-              ListTile(
-                title: Text(
-                  student['name'] as String,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 20,
+          // Menampilkan data ke layar (Tahap 14: Integrasi UI Final)
+          return Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // 1. Profile / Identity Card
+                Card(
+                  elevation: 2,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Row(
+                      children: [
+                        const CircleAvatar(
+                          radius: 40,
+                          backgroundImage: AssetImage(
+                            'assets/images/profile.jpg',
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                student['name'] as String,
+                                style: const TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              Text(
+                                student['nim'] as String,
+                                style: TextStyle(color: Colors.grey.shade700),
+                              ),
+                              const SizedBox(height: 4),
+                              Row(
+                                children: [
+                                  const Icon(
+                                    Icons.school,
+                                    size: 16,
+                                    color: Colors.blue,
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    'Flutter Student',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: Colors.blue.shade700,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-                subtitle: Text(student['nim'] as String),
-                leading: const CircleAvatar(child: Icon(Icons.person)),
-              ),
-              const Divider(),
-              Expanded(
-                child: ListView.builder(
-                  itemCount: courses.length,
-                  itemBuilder: (context, index) {
-                    final course = courses[index] as Map<String, dynamic>;
-                    return ListTile(
-                      title: Text(course['title'] as String),
-                      subtitle: Text(course['code'] as String),
-                      trailing: Text(course['status'] as String),
-                    );
-                  },
+                const SizedBox(height: 20),
+
+                // 2. Summary Row (Menggunakan fungsi buildStatCard dari MyApp)
+                Row(
+                  children: [
+                    // Kita membuat instance dari MyApp hanya untuk memanggil fungsinya
+                    // (Secara praktik industri, fungsi ini biasanya dipisah ke file tersendiri)
+                    const MyApp().buildStatCard(
+                      courses.length.toString(),
+                      'Topik',
+                      Icons.library_books,
+                    ),
+                    const SizedBox(width: 8),
+                    // Menghitung jumlah SKS (credits) dari seluruh mata kuliah di JSON
+                    const MyApp().buildStatCard(
+                      courses
+                          .fold(
+                            0,
+                            (sum, item) => sum + (item['credits'] as int),
+                          )
+                          .toString(),
+                      'Total SKS',
+                      Icons.star,
+                    ),
+                  ],
                 ),
-              ),
-            ],
+                const SizedBox(height: 24),
+
+                // Judul List
+                const Text(
+                  'Daftar Materi',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 8),
+
+                // 3. ListView.builder dengan Conditional UI
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: courses.length,
+                    itemBuilder: (context, index) {
+                      final course = courses[index] as Map<String, dynamic>;
+                      // Menentukan status selesai atau belum
+                      final bool isDone = course['status'] == 'done';
+
+                      return Card(
+                        margin: const EdgeInsets.symmetric(vertical: 6),
+                        elevation: 1,
+                        shape: RoundedRectangleBorder(
+                          side: BorderSide(
+                            color: isDone
+                                ? Colors.green.shade200
+                                : Colors.orange.shade200,
+                            width: 1,
+                          ),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: ListTile(
+                          leading: Icon(
+                            isDone
+                                ? Icons.check_circle
+                                : Icons.play_circle_filled,
+                            color: isDone ? Colors.green : Colors.orange,
+                            size: 32,
+                          ),
+                          title: Text(
+                            course['title'] as String,
+                            style: const TextStyle(fontWeight: FontWeight.w600),
+                          ),
+                          subtitle: Text(
+                            '${course['code']} • ${course['credits']} SKS',
+                          ),
+                          trailing: Text(
+                            isDone ? 'Selesai' : 'Berjalan',
+                            style: TextStyle(
+                              color: isDone ? Colors.green : Colors.orange,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
           );
         },
       ),
