@@ -78,7 +78,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Course Explorer',
-      home: const Tahap1Page(), // Ubah sementara ke sini
+      home: const Tahap2Page(), // Ubah ke Tahap2Page
     );
   }
 }
@@ -373,6 +373,66 @@ class Tahap1Page extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+// Halaman sementara untuk Tahap 2
+class Tahap2Page extends StatelessWidget {
+  const Tahap2Page({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    // TAHAP 2: Membaca karakteristik layar menggunakan MediaQuery
+    final size = MediaQuery.of(context).size;
+    final orientation = MediaQuery.of(context).orientation;
+
+    // Menentukan kategori layout berdasarkan lebar
+    final String layoutCategory = size.width < 600 ? 'Compact' : 'Wide';
+
+    return Scaffold(
+      appBar: AppBar(title: const Text('Tahap 2: MediaQuery')),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text(
+              '2415051039 - Agus Prasetya',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 24),
+            Text(
+              'Width: ${size.width.toStringAsFixed(0)} px',
+              style: const TextStyle(fontSize: 16),
+            ),
+            Text(
+              'Height: ${size.height.toStringAsFixed(0)} px',
+              style: const TextStyle(fontSize: 16),
+            ),
+            Text(
+              'Orientation: ${orientation.name}',
+              style: const TextStyle(fontSize: 16),
+            ),
+            const SizedBox(height: 24),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              decoration: BoxDecoration(
+                color: size.width < 600
+                    ? Colors.blue.shade100
+                    : Colors.orange.shade100,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Text(
+                'Layout: $layoutCategory',
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
