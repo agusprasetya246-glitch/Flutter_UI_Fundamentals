@@ -78,7 +78,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Course Explorer',
-      home: const Tahap9ListPage(), // Ubah ke Tahap9ListPage
+      home: const Tahap10MainScreen(), // Ubah ke Tahap10MainScreen
     );
   }
 }
@@ -1142,6 +1142,133 @@ class _Tahap9ListPageState extends State<Tahap9ListPage> {
               },
             ),
           ),
+        ],
+      ),
+    );
+  }
+}
+// --- TAHAP 10: NavigationBar (Dinamis dari JSON) ---
+
+class Tahap10MainScreen extends StatefulWidget {
+  const Tahap10MainScreen({super.key});
+
+  @override
+  State<Tahap10MainScreen> createState() => _Tahap10MainScreenState();
+}
+
+class _Tahap10MainScreenState extends State<Tahap10MainScreen> {
+  int currentIndex = 0;
+  late Future<Map<String, dynamic>> dataFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    // Memuat data JSON saat halaman pertama kali dibuka
+    dataFuture = loadStudentData();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Tahap 10: NavigationBar')),
+
+      // Menggunakan FutureBuilder untuk membungkus halaman tab
+      body: FutureBuilder<Map<String, dynamic>>(
+        future: dataFuture,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (snapshot.hasError) {
+            return const Center(child: Text('Error memuat data JSON'));
+          }
+
+          // Mengekstrak data JSON
+          final data = snapshot.data!;
+          final student = data['student'] as Map<String, dynamic>;
+          final courses = data['courses'] as List<dynamic>;
+
+          // Menyusun daftar halaman secara dinamis menggunakan data JSON
+          final List<Widget> pages = [
+            // Tab 0: Home (Menampilkan Identitas dari JSON)
+            Center(
+              child: Text(
+                'Halaman Home\n${student['nim']} - ${student['name']}',
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+
+            // Tab 1: Courses (Menampilkan Daftar ListView dari JSON)
+            ListView.builder(
+              itemCount: courses.length,
+              itemBuilder: (context, index) {
+                final course = courses[index];
+                return Card(
+                  margin: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                  child: ListTile(
+                    leading: const Icon(Icons.book, color: Colors.blue),
+                    title: Text(
+                      course['title'],
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    subtitle: Text(
+                      '${course['code']} • ${course['credits']} SKS',
+                    ),
+                  ),
+                );
+              },
+            ),
+
+            // Tab 2: Profile (Menampilkan Profil dari JSON)
+            Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const CircleAvatar(
+                    radius: 50,
+                    child: Icon(Icons.person, size: 50),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    student['name'] as String,
+                    style: const TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  Text(
+                    'NIM: ${student['nim']}',
+                    style: const TextStyle(fontSize: 18),
+                  ),
+                ],
+              ),
+            ),
+          ];
+
+          // Menampilkan halaman sesuai indeks yang dipilih di bottom navigation
+          return pages[currentIndex];
+        },
+      ),
+
+      // Bottom Navigation Bar tetap sama
+      bottomNavigationBar: NavigationBar(
+        selectedIndex: currentIndex,
+        onDestinationSelected: (int index) {
+          setState(() {
+            currentIndex = index;
+          });
+        },
+        destinations: const [
+          NavigationDestination(icon: Icon(Icons.home), label: 'Home'),
+          NavigationDestination(icon: Icon(Icons.school), label: 'Courses'),
+          NavigationDestination(icon: Icon(Icons.person), label: 'Profile'),
         ],
       ),
     );
