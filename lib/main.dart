@@ -78,7 +78,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Course Explorer',
-      home: const Tahap13Page(), // Ubah ke Tahap13Page
+      home: const Tahap14Page(), // Ubah ke Tahap14Page
     );
   }
 }
@@ -1693,6 +1693,171 @@ class _Tahap13PageState extends State<Tahap13Page> {
                     'Kirim Feedback',
                     style: TextStyle(fontSize: 16),
                   ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+// --- TAHAP 14: SnackBar, Dialog, dan Loading Feedback ---
+
+class Tahap14Page extends StatefulWidget {
+  const Tahap14Page({super.key});
+
+  @override
+  State<Tahap14Page> createState() => _Tahap14PageState();
+}
+
+class _Tahap14PageState extends State<Tahap14Page> {
+  final _formKey = GlobalKey<FormState>();
+  final TextEditingController _komentarController = TextEditingController();
+
+  // TAHAP 14: State boolean untuk mengontrol tampilan loading
+  bool _isLoading = false;
+
+  @override
+  void dispose() {
+    _komentarController.dispose();
+    super.dispose();
+  }
+
+  // TAHAP 14: Fungsi untuk memproses pengiriman data (Syarat 56 & 57)
+  void _submitForm() {
+    if (_formKey.currentState!.validate()) {
+      // Syarat 56: Menampilkan AlertDialog sebelum aksi penting
+      showDialog(
+        context: context,
+        builder: (BuildContext dialogContext) {
+          return AlertDialog(
+            title: const Text('Konfirmasi Pengiriman'),
+            content: const Text(
+              'Apakah Anda yakin ingin mengirim feedback ini? Data tidak dapat diubah setelah dikirim.',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () =>
+                    Navigator.pop(dialogContext), // Batal dan tutup dialog
+                child: const Text('Batal', style: TextStyle(color: Colors.red)),
+              ),
+              ElevatedButton(
+                onPressed: () async {
+                  // Tutup dialog terlebih dahulu
+                  Navigator.pop(dialogContext);
+
+                  // Syarat 57: Simulasi loading (Update state menjadi true)
+                  setState(() {
+                    _isLoading = true;
+                  });
+
+                  // Menunggu 2 detik (simulasi koneksi internet)
+                  await Future.delayed(const Duration(seconds: 2));
+
+                  // Mengembalikan state loading ke false jika widget masih aktif
+                  if (mounted) {
+                    setState(() {
+                      _isLoading = false;
+                    });
+
+                    // Bersihkan form
+                    _komentarController.clear();
+
+                    // Syarat 55: Menampilkan SnackBar setelah aksi selesai dan valid
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          'Terima kasih, $studentName! Feedback berhasil disimpan.',
+                        ),
+                        backgroundColor: Colors.green,
+                        behavior:
+                            SnackBarBehavior.floating, // Tampilan melayang
+                      ),
+                    );
+                  }
+                },
+                child: const Text('Ya, Kirim'),
+              ),
+            ],
+          );
+        },
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Tahap 14: UX Feedback')),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(24.0),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Form Feedback Akhir',
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 24),
+
+              TextFormField(
+                initialValue: studentName,
+                decoration: const InputDecoration(
+                  labelText: 'Nama',
+                  border: OutlineInputBorder(),
+                ),
+                readOnly: true, // Nama tidak perlu diedit
+              ),
+              const SizedBox(height: 16),
+
+              TextFormField(
+                initialValue: studentId,
+                decoration: const InputDecoration(
+                  labelText: 'NIM',
+                  border: OutlineInputBorder(),
+                ),
+                readOnly: true, // NIM tidak perlu diedit
+              ),
+              const SizedBox(height: 16),
+
+              TextFormField(
+                controller: _komentarController,
+                decoration: const InputDecoration(
+                  labelText: 'Komentar',
+                  border: OutlineInputBorder(),
+                ),
+                maxLines: 4,
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty)
+                    return 'Komentar wajib diisi';
+                  if (value.trim().length < 5)
+                    return 'Komentar minimal 5 karakter';
+                  return null;
+                },
+              ),
+              const SizedBox(height: 32),
+
+              // Tombol Submit dengan Conditional Rendering untuk Loading
+              SizedBox(
+                width: double.infinity,
+                height: 50,
+                child: ElevatedButton(
+                  // Jika sedang loading, tombol tidak bisa ditekan (null)
+                  onPressed: _isLoading ? null : _submitForm,
+                  child: _isLoading
+                      // Syarat 57: Tampilkan CircularProgressIndicator jika loading
+                      ? const SizedBox(
+                          height: 24,
+                          width: 24,
+                          child: CircularProgressIndicator(strokeWidth: 3),
+                        )
+                      : const Text(
+                          'Kirim Feedback',
+                          style: TextStyle(fontSize: 16),
+                        ),
                 ),
               ),
             ],
