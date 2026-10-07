@@ -78,7 +78,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Course Explorer',
-      home: const Tahap11MainScreen(), // Ubah ke Tahap11MainScreen
+      home: const Tahap12Page(), // Ubah ke Tahap12Page
     );
   }
 }
@@ -1422,6 +1422,160 @@ class _Tahap11MainScreenState extends State<Tahap11MainScreen> {
           }
           return const SizedBox.shrink(); // Sembunyikan bottom bar jika layar lebar
         },
+      ),
+    );
+  }
+}
+// --- TAHAP 12: User Interaction & Feedback ---
+
+// 1. Membuat widget kartu khusus yang memiliki state (untuk status favorite)
+class InteractiveCourseCard extends StatefulWidget {
+  final Map<String, dynamic> course;
+
+  const InteractiveCourseCard({super.key, required this.course});
+
+  @override
+  State<InteractiveCourseCard> createState() => _InteractiveCourseCardState();
+}
+
+class _InteractiveCourseCardState extends State<InteractiveCourseCard> {
+  // State boolean untuk tombol favorite (Syarat 48)
+  bool isFavorite = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      // clipBehavior penting agar efek ripple dari InkWell tidak bocor keluar sudut Card
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        // Syarat 47: Aksi tap pada CourseCard (Efek Ripple)
+        onTap: () {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Anda menekan: ${widget.course['title']}'),
+              duration: const Duration(seconds: 1),
+            ),
+          );
+        },
+        // Syarat 50: Gesture lain (Long Press) untuk menampilkan informasi
+        onLongPress: () {
+          showDialog(
+            context: context,
+            builder: (context) => AlertDialog(
+              title: const Text('Informasi Detail'),
+              content: Text(
+                'Mata Kuliah: ${widget.course['title']}\nKode: ${widget.course['code']}\nBobot: ${widget.course['credits']} SKS',
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Tutup'),
+                ),
+              ],
+            ),
+          );
+        },
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Row(
+            children: [
+              const Icon(Icons.book, size: 32, color: Colors.blue),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      widget.course['title'],
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+                    Text(
+                      '${widget.course['code']} • ${widget.course['credits']} SKS',
+                    ),
+                  ],
+                ),
+              ),
+              // Syarat 48 & 49: Tombol Favorite dengan icon berubah
+              IconButton(
+                icon: Icon(
+                  isFavorite
+                      ? Icons.favorite
+                      : Icons.favorite_border, // Ganti icon
+                  color: isFavorite ? Colors.red : Colors.grey, // Ganti warna
+                ),
+                onPressed: () {
+                  // Mengubah state dan merender ulang UI
+                  setState(() {
+                    isFavorite = !isFavorite;
+                  });
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// 2. Membuat Halaman Utama untuk Tahap 12
+class Tahap12Page extends StatefulWidget {
+  const Tahap12Page({super.key});
+
+  @override
+  State<Tahap12Page> createState() => _Tahap12PageState();
+}
+
+class _Tahap12PageState extends State<Tahap12Page> {
+  late Future<Map<String, dynamic>> dataFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    dataFuture = loadStudentData(); // Mengambil data dari JSON
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Tahap 12: Interaksi')),
+      body: Column(
+        children: [
+          // Identitas agar terlihat di screenshot
+          const Padding(
+            padding: EdgeInsets.all(16.0),
+            child: Text(
+              'NIM: 2415051039 | Nama: Agus Prasetya',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            ),
+          ),
+          Expanded(
+            child: FutureBuilder<Map<String, dynamic>>(
+              future: dataFuture,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting)
+                  return const Center(child: CircularProgressIndicator());
+                if (snapshot.hasError)
+                  return const Center(child: Text('Error memuat data'));
+
+                final courses = snapshot.data!['courses'] as List<dynamic>;
+
+                return ListView.builder(
+                  itemCount: courses.length,
+                  itemBuilder: (context, index) {
+                    final course = courses[index] as Map<String, dynamic>;
+                    // Memanggil widget interaktif yang baru dibuat
+                    return InteractiveCourseCard(course: course);
+                  },
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
   }
