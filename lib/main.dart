@@ -78,7 +78,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Course Explorer',
-      home: const Tahap10MainScreen(), // Ubah ke Tahap10MainScreen
+      home: const Tahap11MainScreen(), // Ubah ke Tahap11MainScreen
     );
   }
 }
@@ -1270,6 +1270,158 @@ class _Tahap10MainScreenState extends State<Tahap10MainScreen> {
           NavigationDestination(icon: Icon(Icons.school), label: 'Courses'),
           NavigationDestination(icon: Icon(Icons.person), label: 'Profile'),
         ],
+      ),
+    );
+  }
+}
+// --- TAHAP 11: Adaptive Navigation (NavigationBar vs NavigationRail) ---
+
+class Tahap11MainScreen extends StatefulWidget {
+  const Tahap11MainScreen({super.key});
+
+  @override
+  State<Tahap11MainScreen> createState() => _Tahap11MainScreenState();
+}
+
+class _Tahap11MainScreenState extends State<Tahap11MainScreen> {
+  int currentIndex = 0;
+  late Future<Map<String, dynamic>> dataFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    dataFuture = loadStudentData(); // Mengambil data dari JSON
+  }
+
+  // Fungsi helper untuk membangun konten utama (pages)
+  Widget _buildContent(Map<String, dynamic> data) {
+    final student = data['student'] as Map<String, dynamic>;
+    final courses = data['courses'] as List<dynamic>;
+
+    final List<Widget> pages = [
+      Center(
+        child: Text(
+          'Home\n${student['nim']} - ${student['name']}',
+          textAlign: TextAlign.center,
+          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+        ),
+      ),
+      ListView.builder(
+        itemCount: courses.length,
+        itemBuilder: (context, index) {
+          final course = courses[index];
+          return Card(
+            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: ListTile(
+              leading: const Icon(Icons.school),
+              title: Text(course['title']),
+              subtitle: Text('${course['code']} • ${course['credits']} SKS'),
+            ),
+          );
+        },
+      ),
+      Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const CircleAvatar(radius: 50, child: Icon(Icons.person, size: 50)),
+            const SizedBox(height: 16),
+            Text(
+              student['name'],
+              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            ),
+            Text('NIM: ${student['nim']}'),
+          ],
+        ),
+      ),
+    ];
+
+    return pages[currentIndex];
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Tahap 11: Adaptive Navigation')),
+      body: FutureBuilder<Map<String, dynamic>>(
+        future: dataFuture,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting)
+            return const Center(child: CircularProgressIndicator());
+          if (snapshot.hasError)
+            return const Center(child: Text('Error memuat data JSON'));
+
+          final data = snapshot.data!;
+
+          // TAHAP 11: LayoutBuilder untuk menentukan bentuk navigasi
+          return LayoutBuilder(
+            builder: (context, constraints) {
+              // Jika layar lebar (Expanded/Tablet/Desktop), gunakan NavigationRail di samping
+              if (constraints.maxWidth >= 840) {
+                return Row(
+                  children: [
+                    NavigationRail(
+                      selectedIndex: currentIndex,
+                      onDestinationSelected: (int index) =>
+                          setState(() => currentIndex = index),
+                      labelType: NavigationRailLabelType.all,
+                      destinations: const [
+                        NavigationRailDestination(
+                          icon: Icon(Icons.home),
+                          label: Text('Home'),
+                        ),
+                        NavigationRailDestination(
+                          icon: Icon(Icons.school),
+                          label: Text('Courses'),
+                        ),
+                        NavigationRailDestination(
+                          icon: Icon(Icons.person),
+                          label: Text('Profile'),
+                        ),
+                      ],
+                    ),
+                    const VerticalDivider(
+                      thickness: 1,
+                      width: 1,
+                    ), // Garis pemisah vertikal
+                    Expanded(
+                      child: _buildContent(data),
+                    ), // Konten mengisi sisa ruang
+                  ],
+                );
+              }
+              // Jika layar sempit (Compact/Medium/Phone), gunakan UI default Scaffold dengan NavigationBar di bawah
+              else {
+                return _buildContent(data); // Body hanya berisi konten
+              }
+            },
+          );
+        },
+      ),
+
+      // Menampilkan Bottom NavigationBar HANYA jika layarnya bukan layar lebar (< 840)
+      bottomNavigationBar: LayoutBuilder(
+        builder: (context, constraints) {
+          if (constraints.maxWidth < 840) {
+            return NavigationBar(
+              selectedIndex: currentIndex,
+              onDestinationSelected: (int index) =>
+                  setState(() => currentIndex = index),
+              destinations: const [
+                NavigationDestination(icon: Icon(Icons.home), label: 'Home'),
+                NavigationDestination(
+                  icon: Icon(Icons.school),
+                  label: 'Courses',
+                ),
+                NavigationDestination(
+                  icon: Icon(Icons.person),
+                  label: 'Profile',
+                ),
+              ],
+            );
+          }
+          return const SizedBox.shrink(); // Sembunyikan bottom bar jika layar lebar
+        },
       ),
     );
   }
