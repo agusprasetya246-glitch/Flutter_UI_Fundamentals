@@ -78,7 +78,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Course Explorer',
-      home: const Tahap8ListPage(), // Ubah ke Tahap8ListPage
+      home: const Tahap9ListPage(), // Ubah ke Tahap9ListPage
     );
   }
 }
@@ -978,6 +978,162 @@ class _Tahap8ListPageState extends State<Tahap8ListPage> {
                                   Tahap8DetailPage(course: course),
                             ),
                           );
+                        },
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+// --- TAHAP 9: Returning Data ---
+
+// Halaman Penerima Data & Pengirim Nilai Balik (Detail)
+class Tahap9DetailPage extends StatelessWidget {
+  final Map<String, dynamic> course;
+
+  const Tahap9DetailPage({super.key, required this.course});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text(course['title'] as String)),
+      body: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              '2415051039 - Agus Prasetya',
+              style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey),
+            ),
+            const Divider(),
+            const SizedBox(height: 16),
+            Text(
+              course['title'] as String,
+              style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Kode: ${course['code']}',
+              style: const TextStyle(fontSize: 18),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Bobot: ${course['credits']} SKS',
+              style: const TextStyle(fontSize: 18),
+            ),
+            const SizedBox(height: 24),
+
+            // TAHAP 9: Tombol Favorite yang mengirim nilai true saat pop
+            ElevatedButton.icon(
+              onPressed: () {
+                // Mengirim data balik (true) ke halaman sebelumnya
+                Navigator.pop(context, true);
+              },
+              icon: const Icon(Icons.favorite),
+              label: const Text('Pilih / Favorite'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.pink.shade50,
+                foregroundColor: Colors.pink,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// Halaman Pengirim Data & Penerima Nilai Balik (List)
+class Tahap9ListPage extends StatefulWidget {
+  const Tahap9ListPage({super.key});
+
+  @override
+  State<Tahap9ListPage> createState() => _Tahap9ListPageState();
+}
+
+class _Tahap9ListPageState extends State<Tahap9ListPage> {
+  late Future<Map<String, dynamic>> dataFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    dataFuture = loadStudentData();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Tahap 9: Returning Data')),
+      body: Column(
+        children: [
+          const Padding(
+            padding: EdgeInsets.all(16.0),
+            child: Text(
+              'NIM: 2415051039 | Nama: Agus Prasetya',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ),
+          Expanded(
+            child: FutureBuilder<Map<String, dynamic>>(
+              future: dataFuture,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                if (snapshot.hasError) {
+                  return const Center(child: Text('Error memuat data JSON'));
+                }
+
+                final courses = snapshot.data!['courses'] as List<dynamic>;
+
+                return ListView.builder(
+                  itemCount: courses.length,
+                  itemBuilder: (context, index) {
+                    final course = courses[index] as Map<String, dynamic>;
+                    return Card(
+                      margin: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 8,
+                      ),
+                      child: ListTile(
+                        title: Text(
+                          course['title'] as String,
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        subtitle: Text(
+                          '${course['code']} • ${course['credits']} SKS',
+                        ),
+                        trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                        onTap: () async {
+                          // TAHAP 9: Menunggu hasil dari halaman detail menggunakan 'await'
+                          final result = await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  Tahap9DetailPage(course: course),
+                            ),
+                          );
+
+                          // TAHAP 9: Menampilkan SnackBar jika result == true
+                          // context.mounted digunakan untuk memastikan halaman tidak di-destroy saat menunggu
+                          if (result == true && context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  '${course['title']} berhasil ditambahkan ke Favorite!',
+                                ),
+                                backgroundColor: Colors.green,
+                                duration: const Duration(seconds: 2),
+                              ),
+                            );
+                          }
                         },
                       ),
                     );
