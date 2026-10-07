@@ -78,7 +78,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Course Explorer',
-      home: const Tahap15ResponsiveShell(), // UBAH KE SINI
+      home: const Tahap15ResponsiveShell(),
     );
   }
 }
@@ -2526,6 +2526,130 @@ class _Tahap15ResponsiveShellState extends State<Tahap15ResponsiveShell> {
           }
           return const SizedBox.shrink();
         },
+      ),
+    );
+  }
+}
+// --- TAHAP 16: DEBUGGING CHALLENGE ---
+
+class Tahap16DebuggingPage extends StatefulWidget {
+  const Tahap16DebuggingPage({super.key});
+
+  @override
+  State<Tahap16DebuggingPage> createState() => _Tahap16DebuggingPageState();
+}
+
+class _Tahap16DebuggingPageState extends State<Tahap16DebuggingPage> {
+  // Flag untuk Kasus D (Mencegah navigasi ganda)
+  bool _isNavigating = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Tahap 16: Debugging')),
+      // SOLUSI KASUS C: Membungkus dengan SingleChildScrollView
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'NIM: 2415051039 | Nama: Agus Prasetya',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            const Divider(height: 32),
+
+            // --- KASUS A: RenderFlex Overflow pada Row ---
+            const Text(
+              'KASUS A: RenderFlex Overflow',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            Container(
+              color: Colors.red.shade50,
+              padding: const EdgeInsets.all(8),
+              child: Row(
+                children: [
+                  const Icon(Icons.info, color: Colors.red),
+                  const SizedBox(width: 8),
+                  // SOLUSI KASUS A: Membungkus Text dengan Expanded
+                  Expanded(
+                    child: Text(
+                      '$studentId - $studentName - teks sangat panjang yang sebelumnya menyebabkan error overflow berupa garis kuning hitam di tepi layar.',
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 24),
+
+            // --- KASUS B: Unbounded Height (ListView di dalam Column) ---
+            const Text(
+              'KASUS B: ListView dalam Column',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            Container(
+              height: 150, // Batasan tinggi buatan agar tidak memenuhi layar
+              color: Colors.blue.shade50,
+              child: Column(
+                children: [
+                  const Text('Header ListView'),
+                  // SOLUSI KASUS B: Membungkus ListView dengan Expanded
+                  Expanded(
+                    child: ListView.builder(
+                      itemCount: 5,
+                      itemBuilder: (context, index) => ListTile(
+                        dense: true,
+                        title: Text('Item List $index'),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 24),
+
+            // --- KASUS C & D: Keyboard Overflow & Double Navigation ---
+            const Text(
+              'KASUS C & D: Form dan Navigasi',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            // Input TextField untuk memancing keyboard (Solusi C ada di SingleChildScrollView terluar)
+            const TextField(
+              decoration: InputDecoration(
+                labelText: 'Ketik untuk tes keyboard (Kasus C)',
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 16),
+
+            // Tombol untuk memicu Kasus D
+            ElevatedButton(
+              // SOLUSI KASUS D: Nonaktifkan tombol (return null) jika sedang memproses navigasi
+              onPressed: _isNavigating
+                  ? null
+                  : () async {
+                      setState(() => _isNavigating = true); // Kunci tombol
+
+                      // Navigasi ke halaman detail mana saja sebagai contoh
+                      await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const Scaffold(
+                            body: Center(child: Text('Halaman Tujuan Kasus D')),
+                          ),
+                        ),
+                      );
+
+                      // Buka kunci tombol setelah kembali dari layar tersebut
+                      setState(() => _isNavigating = false);
+                    },
+              child: const Text('Tes Navigasi (Spam Klik)'),
+            ),
+          ],
+        ),
       ),
     );
   }
