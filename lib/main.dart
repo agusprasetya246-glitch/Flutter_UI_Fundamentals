@@ -78,7 +78,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Course Explorer',
-      home: const Tahap14Page(), // Ubah ke Tahap14Page
+      home: const Tahap15ResponsiveShell(), // UBAH KE SINI
     );
   }
 }
@@ -1863,6 +1863,669 @@ class _Tahap14PageState extends State<Tahap14Page> {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+// ============================================================================
+// TAHAP 15: MINI PROJECT INTEGRASI (RESPONSIVE COURSE EXPLORER)
+// ============================================================================
+
+// --- REUSABLE WIDGET 1: Course Card (Polished) ---
+class Tahap15CourseCard extends StatefulWidget {
+  final Map<String, dynamic> course;
+  const Tahap15CourseCard({super.key, required this.course});
+
+  @override
+  State<Tahap15CourseCard> createState() => _Tahap15CourseCardState();
+}
+
+class _Tahap15CourseCardState extends State<Tahap15CourseCard> {
+  bool isFavorite = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      elevation: 2,
+      shadowColor: Colors.black12,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) =>
+                  Tahap15CourseDetailPage(course: widget.course),
+            ),
+          );
+        },
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              // Ikon dengan latar belakang melingkar yang lembut
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.indigo.shade50,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.menu_book_rounded,
+                  size: 28,
+                  color: Colors.indigo.shade400,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      widget.course['title'],
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                        letterSpacing: 0.2,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    // Menggunakan Chip kecil untuk SKS
+                    Row(
+                      children: [
+                        Text(
+                          widget.course['code'],
+                          style: TextStyle(
+                            color: Colors.grey.shade700,
+                            fontSize: 13,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 2,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.green.shade100,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            '${widget.course['credits']} SKS',
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.green.shade800,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              IconButton(
+                icon: Icon(
+                  isFavorite
+                      ? Icons.favorite_rounded
+                      : Icons.favorite_outline_rounded,
+                ),
+                color: isFavorite ? Colors.pink.shade400 : Colors.grey.shade400,
+                onPressed: () => setState(() => isFavorite = !isFavorite),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// --- REUSABLE WIDGET 2: Feedback Form (Polished) ---
+class Tahap15FeedbackForm extends StatefulWidget {
+  const Tahap15FeedbackForm({super.key});
+
+  @override
+  State<Tahap15FeedbackForm> createState() => _Tahap15FeedbackFormState();
+}
+
+class _Tahap15FeedbackFormState extends State<Tahap15FeedbackForm> {
+  final _formKey = GlobalKey<FormState>();
+  final _komentarController = TextEditingController();
+  bool _isLoading = false;
+
+  @override
+  void dispose() {
+    _komentarController.dispose();
+    super.dispose();
+  }
+
+  void _submitForm() {
+    if (_formKey.currentState!.validate()) {
+      showDialog(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          title: const Row(
+            children: [
+              Icon(Icons.info_outline, color: Colors.indigo),
+              SizedBox(width: 8),
+              Text('Konfirmasi'),
+            ],
+          ),
+          content: const Text('Apakah Anda yakin ingin mengirim feedback ini?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: Text(
+                'Batal',
+                style: TextStyle(color: Colors.grey.shade600),
+              ),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.indigo,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+              onPressed: () async {
+                Navigator.pop(ctx);
+                setState(() => _isLoading = true);
+                await Future.delayed(const Duration(seconds: 2));
+                if (mounted) {
+                  setState(() => _isLoading = false);
+                  _komentarController.clear();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      behavior: SnackBarBehavior.floating,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      content: const Row(
+                        children: [
+                          Icon(Icons.check_circle, color: Colors.white),
+                          SizedBox(width: 8),
+                          Text('Feedback berhasil dikirim!'),
+                        ],
+                      ),
+                      backgroundColor: Colors.teal.shade600,
+                    ),
+                  );
+                }
+              },
+              child: const Text('Ya, Kirim'),
+            ),
+          ],
+        ),
+      );
+    }
+  }
+
+  // Dekorasi khusus untuk input form yang lebih elegan
+  InputDecoration _customInputDecoration(String label, IconData icon) {
+    return InputDecoration(
+      labelText: label,
+      prefixIcon: Icon(icon, color: Colors.indigo.shade300),
+      filled: true,
+      fillColor: Colors.indigo.shade50.withOpacity(0.5),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide.none,
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide.none,
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: Colors.indigo.shade300, width: 1.5),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Form(
+      key: _formKey,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Kirim Feedback',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Colors.indigo,
+            ),
+          ),
+          const SizedBox(height: 16),
+          TextFormField(
+            initialValue: studentName,
+            readOnly: true,
+            decoration: _customInputDecoration('Nama Lengkap', Icons.person),
+          ),
+          const SizedBox(height: 16),
+          TextFormField(
+            initialValue: studentId,
+            readOnly: true,
+            decoration: _customInputDecoration(
+              'Nomor Induk Mahasiswa',
+              Icons.badge,
+            ),
+          ),
+          const SizedBox(height: 16),
+          TextFormField(
+            controller: _komentarController,
+            maxLines: 3,
+            decoration: _customInputDecoration(
+              'Tulis komentar Anda...',
+              Icons.chat_bubble_outline,
+            ),
+            validator: (value) => (value == null || value.trim().length < 5)
+                ? 'Komentar minimal 5 karakter'
+                : null,
+          ),
+          const SizedBox(height: 24),
+          SizedBox(
+            width: double.infinity,
+            height: 50,
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.indigo,
+                foregroundColor: Colors.white,
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              onPressed: _isLoading ? null : _submitForm,
+              child: _isLoading
+                  ? const SizedBox(
+                      height: 24,
+                      width: 24,
+                      child: CircularProgressIndicator(
+                        color: Colors.white,
+                        strokeWidth: 2.5,
+                      ),
+                    )
+                  : const Text(
+                      'Kirim Feedback',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// --- HALAMAN DETAIL (Polished) ---
+class Tahap15CourseDetailPage extends StatelessWidget {
+  final Map<String, dynamic> course;
+  const Tahap15CourseDetailPage({super.key, required this.course});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Detail Course'),
+        centerTitle: true,
+        elevation: 0,
+      ),
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            // Banner Header
+            Container(
+              width: double.infinity,
+              color: Colors.indigo.shade50,
+              padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 24),
+              child: Column(
+                children: [
+                  Icon(
+                    Icons.menu_book_rounded,
+                    size: 80,
+                    color: Colors.indigo.shade300,
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    course['title'],
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.indigo,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            // Konten Detail
+            Padding(
+              padding: const EdgeInsets.all(24.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      _buildInfoColumn('Kode', course['code'], Icons.qr_code),
+                      _buildInfoColumn(
+                        'SKS',
+                        '${course['credits']}',
+                        Icons.star_border_rounded,
+                      ),
+                      _buildInfoColumn(
+                        'Status',
+                        'Tersedia',
+                        Icons.check_circle_outline,
+                      ),
+                    ],
+                  ),
+                  const Divider(height: 48, thickness: 1),
+                  const Text(
+                    'Tentang Mata Kuliah',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Mata kuliah ${course['title']} merupakan bagian dari kurikulum yang wajib diselesaikan. Silakan kerjakan semua modul yang diberikan.',
+                    style: TextStyle(color: Colors.grey.shade700, height: 1.5),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInfoColumn(String label, String value, IconData icon) {
+    return Column(
+      children: [
+        Icon(icon, color: Colors.grey.shade600),
+        const SizedBox(height: 8),
+        Text(
+          value,
+          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        ),
+        Text(
+          label,
+          style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+        ),
+      ],
+    );
+  }
+}
+
+// --- SHELL UTAMA (Polished Profile & Navigation) ---
+class Tahap15ResponsiveShell extends StatefulWidget {
+  const Tahap15ResponsiveShell({super.key});
+
+  @override
+  State<Tahap15ResponsiveShell> createState() => _Tahap15ResponsiveShellState();
+}
+
+class _Tahap15ResponsiveShellState extends State<Tahap15ResponsiveShell> {
+  int _currentIndex = 0;
+  late Future<Map<String, dynamic>> _dataFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _dataFuture = loadStudentData();
+  }
+
+  Widget _buildBody(Map<String, dynamic> data, BoxConstraints constraints) {
+    final student = data['student'];
+    final courses = data['courses'] as List<dynamic>;
+
+    if (_currentIndex == 0) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Image.asset(
+              'assets/images/profile.jpg',
+              width: 120,
+              height: 120,
+              errorBuilder: (ctx, err, stack) => const Icon(
+                Icons.account_circle,
+                size: 120,
+                color: Colors.grey,
+              ),
+            ),
+            const SizedBox(height: 24),
+            Text(
+              'Selamat Datang,\n${student['name']}',
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontSize: 26,
+                fontWeight: FontWeight.bold,
+                color: Colors.indigo,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              student['nim'],
+              style: TextStyle(
+                fontSize: 18,
+                color: Colors.grey.shade600,
+                letterSpacing: 2,
+              ),
+            ),
+          ],
+        ),
+      );
+    } else if (_currentIndex == 1) {
+      if (constraints.maxWidth < 600) {
+        return ListView.builder(
+          padding: const EdgeInsets.only(top: 8),
+          itemCount: courses.length,
+          itemBuilder: (ctx, i) => Tahap15CourseCard(course: courses[i]),
+        );
+      } else {
+        return GridView.builder(
+          padding: const EdgeInsets.all(16),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            childAspectRatio: 3.5,
+            crossAxisSpacing: 8,
+            mainAxisSpacing: 8,
+          ),
+          itemCount: courses.length,
+          itemBuilder: (ctx, i) => Tahap15CourseCard(course: courses[i]),
+        );
+      }
+    } else {
+      return SingleChildScrollView(
+        child: Column(
+          children: [
+            // Header Profile Berwarna
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.only(top: 40, bottom: 24),
+              decoration: const BoxDecoration(
+                color: Colors.indigo,
+                borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(32),
+                  bottomRight: Radius.circular(32),
+                ),
+              ),
+              child: Column(
+                children: [
+                  const CircleAvatar(
+                    radius: 50,
+                    backgroundColor: Colors.white,
+                    child: CircleAvatar(
+                      radius: 46,
+                      backgroundImage: AssetImage('assets/images/profile.jpg'),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    student['name'],
+                    style: const TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                  Text(
+                    student['nim'],
+                    style: TextStyle(color: Colors.indigo.shade100),
+                  ),
+                ],
+              ),
+            ),
+            // Form Card
+            Padding(
+              padding: const EdgeInsets.all(24),
+              child: Card(
+                elevation: 4,
+                shadowColor: Colors.black12,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(24),
+                ),
+                child: const Padding(
+                  padding: EdgeInsets.all(24),
+                  child: Tahap15FeedbackForm(),
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors
+          .grey
+          .shade50, // Latar belakang abu-abu sangat terang agar Card menonjol
+      appBar: AppBar(
+        title: const Text(
+          'Course Explorer',
+          style: TextStyle(fontWeight: FontWeight.w600),
+        ),
+        centerTitle: true,
+        elevation: 0,
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.indigo,
+      ),
+      body: FutureBuilder<Map<String, dynamic>>(
+        future: _dataFuture,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting)
+            return const Center(
+              child: CircularProgressIndicator(color: Colors.indigo),
+            );
+          if (snapshot.hasError)
+            return const Center(child: Text('Error memuat data JSON'));
+
+          final data = snapshot.data!;
+          return LayoutBuilder(
+            builder: (context, constraints) {
+              if (constraints.maxWidth >= 840) {
+                return Row(
+                  children: [
+                    NavigationRail(
+                      backgroundColor: Colors.white,
+                      selectedIndex: _currentIndex,
+                      onDestinationSelected: (int index) =>
+                          setState(() => _currentIndex = index),
+                      labelType: NavigationRailLabelType.all,
+                      selectedIconTheme: const IconThemeData(
+                        color: Colors.indigo,
+                      ),
+                      selectedLabelTextStyle: const TextStyle(
+                        color: Colors.indigo,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      destinations: const [
+                        NavigationRailDestination(
+                          icon: Icon(Icons.home_outlined),
+                          selectedIcon: Icon(Icons.home_rounded),
+                          label: Text('Home'),
+                        ),
+                        NavigationRailDestination(
+                          icon: Icon(Icons.school_outlined),
+                          selectedIcon: Icon(Icons.school_rounded),
+                          label: Text('Courses'),
+                        ),
+                        NavigationRailDestination(
+                          icon: Icon(Icons.person_outline),
+                          selectedIcon: Icon(Icons.person_rounded),
+                          label: Text('Profile'),
+                        ),
+                      ],
+                    ),
+                    const VerticalDivider(
+                      thickness: 1,
+                      width: 1,
+                      color: Colors.black12,
+                    ),
+                    Expanded(child: _buildBody(data, constraints)),
+                  ],
+                );
+              } else {
+                return _buildBody(data, constraints);
+              }
+            },
+          );
+        },
+      ),
+      bottomNavigationBar: LayoutBuilder(
+        builder: (context, constraints) {
+          if (constraints.maxWidth < 840) {
+            return NavigationBar(
+              backgroundColor: Colors.white,
+              elevation: 10,
+              shadowColor: Colors.black45,
+              indicatorColor: Colors.indigo.shade100,
+              selectedIndex: _currentIndex,
+              onDestinationSelected: (int index) =>
+                  setState(() => _currentIndex = index),
+              destinations: const [
+                NavigationDestination(
+                  icon: Icon(Icons.home_outlined),
+                  selectedIcon: Icon(Icons.home_rounded, color: Colors.indigo),
+                  label: 'Home',
+                ),
+                NavigationDestination(
+                  icon: Icon(Icons.school_outlined),
+                  selectedIcon: Icon(
+                    Icons.school_rounded,
+                    color: Colors.indigo,
+                  ),
+                  label: 'Courses',
+                ),
+                NavigationDestination(
+                  icon: Icon(Icons.person_outline),
+                  selectedIcon: Icon(
+                    Icons.person_rounded,
+                    color: Colors.indigo,
+                  ),
+                  label: 'Profile',
+                ),
+              ],
+            );
+          }
+          return const SizedBox.shrink();
+        },
       ),
     );
   }
