@@ -78,7 +78,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Course Explorer',
-      home: const Tahap12Page(), // Ubah ke Tahap12Page
+      home: const Tahap13Page(), // Ubah ke Tahap13Page
     );
   }
 }
@@ -1576,6 +1576,128 @@ class _Tahap12PageState extends State<Tahap12Page> {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+// --- TAHAP 13: Form Input dan Validasi ---
+
+class Tahap13Page extends StatefulWidget {
+  const Tahap13Page({super.key});
+
+  @override
+  State<Tahap13Page> createState() => _Tahap13PageState();
+}
+
+class _Tahap13PageState extends State<Tahap13Page> {
+  // TAHAP 13: Identifier unik untuk mengontrol dan memvalidasi Form
+  final _formKey = GlobalKey<FormState>();
+
+  // Controller untuk menangkap teks input komentar
+  final TextEditingController _komentarController = TextEditingController();
+
+  @override
+  void dispose() {
+    _komentarController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Tahap 13: Form Validasi')),
+      // Menggunakan SingleChildScrollView agar layar bisa di-scroll saat keyboard muncul
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(24.0),
+        child: Form(
+          key: _formKey, // Memasang kunci pada form
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Form Feedback',
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 24),
+
+              // 1. Field Nama (Terisi otomatis)
+              TextFormField(
+                initialValue: studentName, // Mengambil dari konstanta global
+                decoration: const InputDecoration(
+                  labelText: 'Nama',
+                  border: OutlineInputBorder(),
+                ),
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty)
+                    return 'Nama wajib diisi';
+                  return null;
+                },
+              ),
+              const SizedBox(height: 16),
+
+              // 2. Field NIM (Terisi otomatis)
+              TextFormField(
+                initialValue: studentId, // Mengambil dari konstanta global
+                decoration: const InputDecoration(
+                  labelText: 'NIM',
+                  border: OutlineInputBorder(),
+                ),
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty)
+                    return 'NIM wajib diisi';
+                  return null;
+                },
+              ),
+              const SizedBox(height: 16),
+
+              // 3. Field Komentar (Kosong)
+              TextFormField(
+                controller: _komentarController,
+                decoration: const InputDecoration(
+                  labelText: 'Komentar',
+                  border: OutlineInputBorder(),
+                ),
+                maxLines: 4,
+                // Validasi khusus untuk Komentar
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'Komentar wajib diisi';
+                  } else if (value.trim().length < 5) {
+                    return 'Komentar minimal 5 karakter'; // Syarat 53
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 32),
+
+              // Tombol Submit
+              SizedBox(
+                width: double.infinity,
+                height: 50,
+                child: ElevatedButton(
+                  onPressed: () {
+                    // TAHAP 13: Menjalankan validasi form saat tombol ditekan
+                    if (_formKey.currentState!.validate()) {
+                      // Jika semua return validator adalah null (lolos validasi)
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            'Feedback dari $studentName terkirim!\nKomentar: ${_komentarController.text}',
+                          ),
+                          backgroundColor: Colors.green,
+                        ),
+                      );
+                    }
+                  },
+                  child: const Text(
+                    'Kirim Feedback',
+                    style: TextStyle(fontSize: 16),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
