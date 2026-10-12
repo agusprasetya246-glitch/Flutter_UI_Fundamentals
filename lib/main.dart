@@ -2,6 +2,9 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
+import 'package:provider/provider.dart';
+
+import 'course_provider.dart';
 
 // Identitas Global
 const String studentName = 'Agus Prasetya';
@@ -15,7 +18,13 @@ Future<Map<String, dynamic>> loadStudentData() async {
 }
 
 void main() {
-  runApp(const MyApp());
+  runApp(
+    // Membungkus seluruh aplikasi dengan Provider
+    ChangeNotifierProvider(
+      create: (_) => CourseProvider(), // Membuat instance dari CourseProvider
+      child: const MyApp(), // MyApp kini berada "di bawah" asuhan Provider
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
