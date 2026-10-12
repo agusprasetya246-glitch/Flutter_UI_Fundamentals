@@ -31,7 +31,7 @@ class MyApp extends StatelessWidget {
         scaffoldBackgroundColor:
             Colors.grey.shade50, // Warna background aplikasi
       ),
-      home: const MainScreen(),
+      home: const Tahap4ValueNotifierPage(),
     );
   }
 }
@@ -1032,6 +1032,100 @@ class CourseListDummy extends StatelessWidget {
               onPressed: onFavoriteToggle, // Memicu fungsi di Parent
               icon: const Icon(Icons.favorite),
               label: const Text('Tambah Favorit'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+// ============================================================================
+// TAHAP 4: EKSPERIMEN VALUENOTIFIER VS SETSTATE
+// ============================================================================
+
+class Tahap4ValueNotifierPage extends StatefulWidget {
+  const Tahap4ValueNotifierPage({super.key});
+
+  @override
+  State<Tahap4ValueNotifierPage> createState() =>
+      _Tahap4ValueNotifierPageState();
+}
+
+class _Tahap4ValueNotifierPageState extends State<Tahap4ValueNotifierPage> {
+  // 1. Deklarasi State biasa (Untuk setState)
+  int _stateBiasa = 0;
+
+  // 2. Deklarasi ValueNotifier
+  final ValueNotifier<int> _stateNotifier = ValueNotifier<int>(0);
+
+  @override
+  void dispose() {
+    // ValueNotifier memakan memori, jadi WAJIB dibuang (dispose) saat halaman ditutup
+    _stateNotifier.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // Perintah ini akan muncul di Terminal (Debug Console) setiap kali fungsi build() berjalan.
+    debugPrint(' BUILD HALAMAN DIGAMBAR ULANG KESELURUHAN!');
+
+    return Scaffold(
+      appBar: AppBar(title: const Text('Tahap 4: ValueNotifier')),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text(
+              'NIM: 2415051039 | Nama: Agus Prasetya',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            const Divider(height: 40),
+
+            // --- BAGIAN 1: MENGGUNAKAN SETSTATE ---
+            const Text(
+              '1. Menggunakan setState()',
+              style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+            ),
+            Text('Nilai: $_stateBiasa', style: const TextStyle(fontSize: 24)),
+            ElevatedButton(
+              onPressed: () {
+                // Saat ditekan, ini akan memicu print('BUILD HALAMAN...') di terminal!
+                setState(() {
+                  _stateBiasa++;
+                });
+              },
+              child: const Text('Tambah (setState)'),
+            ),
+
+            const SizedBox(height: 40),
+
+            // --- BAGIAN 2: MENGGUNAKAN VALUENOTIFIER ---
+            const Text(
+              '2. Menggunakan ValueNotifier',
+              style: TextStyle(
+                color: Colors.green,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+
+            // Ia HANYA akan menggambar ulang widget Text di dalamnya, tanpa memanggil ulang build() halaman!
+            ValueListenableBuilder<int>(
+              valueListenable: _stateNotifier,
+              builder: (context, value, child) {
+                return Text(
+                  'Nilai: $value',
+                  style: const TextStyle(fontSize: 24),
+                );
+              },
+            ),
+
+            ElevatedButton(
+              onPressed: () {
+                // Perhatikan terminal, tidak akan ada tulisan ' BUILD HALAMAN...' yang muncul.
+                _stateNotifier.value++;
+              },
+              child: const Text('Tambah (Notifier)'),
             ),
           ],
         ),
