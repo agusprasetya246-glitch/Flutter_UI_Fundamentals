@@ -31,7 +31,7 @@ class MyApp extends StatelessWidget {
         scaffoldBackgroundColor:
             Colors.grey.shade50, // Warna background aplikasi
       ),
-      home: const MainScreen(),
+      home: const Tahap2ExperimentPage(), // Ubah sementara
     );
   }
 }
@@ -868,6 +868,138 @@ class _MainScreenState extends State<MainScreen> {
           }
           return const SizedBox.shrink();
         },
+      ),
+    );
+  }
+}
+
+// ============================================================================
+// TAHAP 2: EKSPERIMEN PROP DRILLING
+// ============================================================================
+
+class Tahap2ExperimentPage extends StatefulWidget {
+  const Tahap2ExperimentPage({super.key});
+
+  @override
+  State<Tahap2ExperimentPage> createState() => _Tahap2ExperimentPageState();
+}
+
+class _Tahap2ExperimentPageState extends State<Tahap2ExperimentPage> {
+  // 9. Gunakan satu nilai favorites pada parent.
+  int _favoriteCount = 0;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Tahap 2: Prop Drilling')),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const Text(
+              'NIM: 2415051039 | Nama: Agus Prasetya',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              textAlign: TextAlign.center,
+            ),
+            const Divider(height: 32),
+            const Text(
+              'Parent (Pemilik State)',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: Colors.indigo,
+              ),
+            ),
+            const SizedBox(height: 16),
+
+            // 10. Teruskan nilai ke dua child menggunakan constructor
+            CourseSummaryDummy(favoriteCount: _favoriteCount),
+
+            const SizedBox(height: 16),
+
+            CourseListDummy(
+              favoriteCount: _favoriteCount,
+              // 11. Tambahkan callback dari child ke parent untuk mengubah favorites
+              onFavoriteToggle: () {
+                setState(() {
+                  _favoriteCount++;
+                });
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// --- CHILD 1: CourseSummary ---
+class CourseSummaryDummy extends StatelessWidget {
+  final int favoriteCount; // Menerima data dari Parent
+
+  const CourseSummaryDummy({super.key, required this.favoriteCount});
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      color: Colors.blue.shade50,
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            const Text(
+              'Child 1: CourseSummary',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Total Favorit: $favoriteCount',
+              style: const TextStyle(fontSize: 18),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// --- CHILD 2: CourseList ---
+class CourseListDummy extends StatelessWidget {
+  final int favoriteCount; // Menerima data dari Parent
+  final VoidCallback onFavoriteToggle; // Menerima fungsi (callback) dari Parent
+
+  const CourseListDummy({
+    super.key,
+    required this.favoriteCount,
+    required this.onFavoriteToggle,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      color: Colors.orange.shade50,
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            const Text(
+              'Child 2: CourseList',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Favorit di List: $favoriteCount',
+              style: const TextStyle(fontSize: 18),
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton.icon(
+              onPressed: onFavoriteToggle, // Memicu fungsi di Parent
+              icon: const Icon(Icons.favorite),
+              label: const Text('Tambah Favorit'),
+            ),
+          ],
+        ),
       ),
     );
   }
