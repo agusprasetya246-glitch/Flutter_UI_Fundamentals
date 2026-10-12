@@ -31,7 +31,7 @@ class MyApp extends StatelessWidget {
         scaffoldBackgroundColor:
             Colors.grey.shade50, // Warna background aplikasi
       ),
-      home: const Tahap2ExperimentPage(), // Ubah sementara
+      home: const MainScreen(),
     );
   }
 }
@@ -40,17 +40,24 @@ class MyApp extends StatelessWidget {
 // KOMPONEN APLIKASI UTAMA
 // ============================================================================
 
-// --- COURSE CARD WIDGET ---
-class CourseCard extends StatefulWidget {
+// ============================================================================
+// TAHAP 3: LIFTING STATE UP & SINGLE SOURCE OF TRUTH
+// ============================================================================
+
+// --- COURSE CARD
+class CourseCard extends StatelessWidget {
   final Map<String, dynamic> course;
-  const CourseCard({super.key, required this.course});
+  // 15. Menerima data dari parent melalui constructor
+  final bool isFavorite;
+  // 16. Menerima aksi perubahan melalui callback
+  final VoidCallback onFavoriteToggle;
 
-  @override
-  State<CourseCard> createState() => _CourseCardState();
-}
-
-class _CourseCardState extends State<CourseCard> {
-  bool isFavorite = false; // Local State
+  const CourseCard({
+    super.key,
+    required this.course,
+    required this.isFavorite,
+    required this.onFavoriteToggle,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -62,11 +69,10 @@ class _CourseCardState extends State<CourseCard> {
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: () {
-          // Navigasi ke Detail
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => CourseDetailPage(course: widget.course),
+              builder: (context) => CourseDetailPage(course: course),
             ),
           );
         },
@@ -92,7 +98,7 @@ class _CourseCardState extends State<CourseCard> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      widget.course['title'],
+                      course['title'],
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
@@ -102,7 +108,7 @@ class _CourseCardState extends State<CourseCard> {
                     Row(
                       children: [
                         Text(
-                          widget.course['code'],
+                          course['code'],
                           style: TextStyle(
                             color: Colors.grey.shade700,
                             fontSize: 13,
@@ -119,7 +125,7 @@ class _CourseCardState extends State<CourseCard> {
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Text(
-                            '${widget.course['credits']} SKS',
+                            '${course['credits']} SKS',
                             style: TextStyle(
                               fontSize: 11,
                               fontWeight: FontWeight.bold,
@@ -133,13 +139,15 @@ class _CourseCardState extends State<CourseCard> {
                 ),
               ),
               IconButton(
+                // Membaca state dari Parent
                 icon: Icon(
                   isFavorite
                       ? Icons.favorite_rounded
                       : Icons.favorite_outline_rounded,
                 ),
                 color: isFavorite ? Colors.pink.shade400 : Colors.grey.shade400,
-                onPressed: () => setState(() => isFavorite = !isFavorite),
+                // Memicu aksi callback menuju Parent!
+                onPressed: onFavoriteToggle,
               ),
             ],
           ),
@@ -452,6 +460,21 @@ class _MainScreenState extends State<MainScreen> {
   int _currentIndex = 0;
   late Future<Map<String, dynamic>> _dataFuture;
 
+  // 14. Pindahkan kepemilikan state ke parent terdekat (Single Source of Truth)
+  // Menggunakan Set agar tidak ada duplikasi kode mata kuliah
+  final Set<String> _favoriteCourseCodes = {};
+
+  // Fungsi untuk memodifikasi state
+  void _toggleFavorite(String code) {
+    setState(() {
+      if (_favoriteCourseCodes.contains(code)) {
+        _favoriteCourseCodes.remove(code);
+      } else {
+        _favoriteCourseCodes.add(code);
+      }
+    });
+  }
+
   @override
   void initState() {
     super.initState();
@@ -464,19 +487,20 @@ class _MainScreenState extends State<MainScreen> {
     final courses = data['courses'] as List<dynamic>;
 
     if (_currentIndex == 0) {
-      // TAB HOME
+      // TAB HOME: Membaca jumlah total favorit dari Single Source of Truth
       final totalCourses = courses.length;
       final totalCredits = courses.fold<int>(
         0,
         (sum, item) => sum + (item['credits'] as int),
       );
+      final totalFavorites = _favoriteCourseCodes.length;
 
       return SingleChildScrollView(
         padding: const EdgeInsets.all(24.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 1. Hero Banner (Kartu Sambutan)
+            // Hero Banner
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(24),
@@ -497,7 +521,6 @@ class _MainScreenState extends State<MainScreen> {
               ),
               child: Row(
                 children: [
-                  // Foto Profil Bulat
                   Container(
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
@@ -557,8 +580,6 @@ class _MainScreenState extends State<MainScreen> {
               ),
             ),
             const SizedBox(height: 32),
-
-            // 2. Judul Section Statistik
             const Text(
               'Ringkasan Belajar',
               style: TextStyle(
@@ -569,7 +590,7 @@ class _MainScreenState extends State<MainScreen> {
             ),
             const SizedBox(height: 16),
 
-            // 3. Kartu Statistik (Row)
+            // Kartu Statistik (17. Menampilkan nilai konsisten)
             Row(
               children: [
                 Expanded(
@@ -637,18 +658,18 @@ class _MainScreenState extends State<MainScreen> {
                         Container(
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: Colors.green.shade50,
+                            color: Colors.pink.shade50,
                             shape: BoxShape.circle,
                           ),
                           child: Icon(
-                            Icons.star_rounded,
-                            color: Colors.green.shade400,
+                            Icons.favorite_rounded,
+                            color: Colors.pink.shade400,
                             size: 28,
                           ),
                         ),
                         const SizedBox(height: 12),
                         Text(
-                          '$totalCredits',
+                          '$totalFavorites',
                           style: const TextStyle(
                             fontSize: 28,
                             fontWeight: FontWeight.bold,
@@ -656,7 +677,7 @@ class _MainScreenState extends State<MainScreen> {
                           ),
                         ),
                         const Text(
-                          'Total SKS',
+                          'Total Favorit',
                           style: TextStyle(color: Colors.grey),
                         ),
                       ],
@@ -669,12 +690,19 @@ class _MainScreenState extends State<MainScreen> {
         ),
       );
     } else if (_currentIndex == 1) {
-      // TAB COURSES (Responsive)
+      // TAB COURSES: Melempar state & callback ke CourseCard
       if (constraints.maxWidth < 600) {
         return ListView.builder(
           padding: const EdgeInsets.only(top: 8),
           itemCount: courses.length,
-          itemBuilder: (ctx, i) => CourseCard(course: courses[i]),
+          itemBuilder: (ctx, i) {
+            final courseCode = courses[i]['code'];
+            return CourseCard(
+              course: courses[i],
+              isFavorite: _favoriteCourseCodes.contains(courseCode),
+              onFavoriteToggle: () => _toggleFavorite(courseCode),
+            );
+          },
         );
       } else {
         return GridView.builder(
@@ -686,7 +714,14 @@ class _MainScreenState extends State<MainScreen> {
             mainAxisSpacing: 8,
           ),
           itemCount: courses.length,
-          itemBuilder: (ctx, i) => CourseCard(course: courses[i]),
+          itemBuilder: (ctx, i) {
+            final courseCode = courses[i]['code'];
+            return CourseCard(
+              course: courses[i],
+              isFavorite: _favoriteCourseCodes.contains(courseCode),
+              onFavoriteToggle: () => _toggleFavorite(courseCode),
+            );
+          },
         );
       }
     } else {
