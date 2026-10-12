@@ -31,7 +31,7 @@ class MyApp extends StatelessWidget {
         scaffoldBackgroundColor:
             Colors.grey.shade50, // Warna background aplikasi
       ),
-      home: const Tahap4ValueNotifierPage(),
+      home: const MainScreen(),
     );
   }
 }
@@ -460,19 +460,28 @@ class _MainScreenState extends State<MainScreen> {
   int _currentIndex = 0;
   late Future<Map<String, dynamic>> _dataFuture;
 
-  // 14. Pindahkan kepemilikan state ke parent terdekat (Single Source of Truth)
-  // Menggunakan Set agar tidak ada duplikasi kode mata kuliah
-  final Set<String> _favoriteCourseCodes = {};
+  // Menggunakan ValueNotifier
+  final ValueNotifier<Set<String>> _favoriteCourseCodes =
+      ValueNotifier<Set<String>>({});
 
-  // Fungsi untuk memodifikasi state
+  @override
+  void dispose() {
+    _favoriteCourseCodes.dispose(); // Wajib di-dispose saat halaman ditutup
+    super.dispose();
+  }
+
   void _toggleFavorite(String code) {
-    setState(() {
-      if (_favoriteCourseCodes.contains(code)) {
-        _favoriteCourseCodes.remove(code);
-      } else {
-        _favoriteCourseCodes.add(code);
-      }
-    });
+    // Buat salinan set yang ada agar ValueNotifier mendeteksi perubahan referensi
+    final currentFavorites = Set<String>.from(_favoriteCourseCodes.value);
+
+    if (currentFavorites.contains(code)) {
+      currentFavorites.remove(code);
+    } else {
+      currentFavorites.add(code);
+    }
+
+    // Perbarui nilai notifier (ini otomatis memicu listener tanpa setState global!)
+    _favoriteCourseCodes.value = currentFavorites;
   }
 
   @override
@@ -487,14 +496,6 @@ class _MainScreenState extends State<MainScreen> {
     final courses = data['courses'] as List<dynamic>;
 
     if (_currentIndex == 0) {
-      // TAB HOME: Membaca jumlah total favorit dari Single Source of Truth
-      final totalCourses = courses.length;
-      final totalCredits = courses.fold<int>(
-        0,
-        (sum, item) => sum + (item['credits'] as int),
-      );
-      final totalFavorites = _favoriteCourseCodes.length;
-
       return SingleChildScrollView(
         padding: const EdgeInsets.all(24.0),
         child: Column(
@@ -623,7 +624,7 @@ class _MainScreenState extends State<MainScreen> {
                         ),
                         const SizedBox(height: 12),
                         Text(
-                          '$totalCourses',
+                          '${courses.length}',
                           style: const TextStyle(
                             fontSize: 28,
                             fontWeight: FontWeight.bold,
@@ -668,13 +669,19 @@ class _MainScreenState extends State<MainScreen> {
                           ),
                         ),
                         const SizedBox(height: 12),
-                        Text(
-                          '$totalFavorites',
-                          style: const TextStyle(
-                            fontSize: 28,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.indigo,
-                          ),
+
+                        ValueListenableBuilder<Set<String>>(
+                          valueListenable: _favoriteCourseCodes,
+                          builder: (context, favorites, child) {
+                            return Text(
+                              '${favorites.length}',
+                              style: const TextStyle(
+                                fontSize: 28,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.indigo,
+                              ),
+                            );
+                          },
                         ),
                         const Text(
                           'Total Favorit',
@@ -690,17 +697,22 @@ class _MainScreenState extends State<MainScreen> {
         ),
       );
     } else if (_currentIndex == 1) {
-      // TAB COURSES: Melempar state & callback ke CourseCard
+      // TAB COURSES
       if (constraints.maxWidth < 600) {
         return ListView.builder(
           padding: const EdgeInsets.only(top: 8),
           itemCount: courses.length,
           itemBuilder: (ctx, i) {
             final courseCode = courses[i]['code'];
-            return CourseCard(
-              course: courses[i],
-              isFavorite: _favoriteCourseCodes.contains(courseCode),
-              onFavoriteToggle: () => _toggleFavorite(courseCode),
+            return ValueListenableBuilder<Set<String>>(
+              valueListenable: _favoriteCourseCodes,
+              builder: (context, favorites, child) {
+                return CourseCard(
+                  course: courses[i],
+                  isFavorite: favorites.contains(courseCode), // Cek dari .value
+                  onFavoriteToggle: () => _toggleFavorite(courseCode),
+                );
+              },
             );
           },
         );
@@ -716,10 +728,15 @@ class _MainScreenState extends State<MainScreen> {
           itemCount: courses.length,
           itemBuilder: (ctx, i) {
             final courseCode = courses[i]['code'];
-            return CourseCard(
-              course: courses[i],
-              isFavorite: _favoriteCourseCodes.contains(courseCode),
-              onFavoriteToggle: () => _toggleFavorite(courseCode),
+            return ValueListenableBuilder<Set<String>>(
+              valueListenable: _favoriteCourseCodes,
+              builder: (context, favorites, child) {
+                return CourseCard(
+                  course: courses[i],
+                  isFavorite: favorites.contains(courseCode), // Cek dari .value
+                  onFavoriteToggle: () => _toggleFavorite(courseCode),
+                );
+              },
             );
           },
         );
