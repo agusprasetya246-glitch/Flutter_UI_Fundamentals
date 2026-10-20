@@ -56,20 +56,18 @@ class MyApp extends StatelessWidget {
 // --- COURSE CARD
 class CourseCard extends StatelessWidget {
   final Map<String, dynamic> course;
-  // 15. Menerima data dari parent melalui constructor
-  final bool isFavorite;
-  // 16. Menerima aksi perubahan melalui callback
-  final VoidCallback onFavoriteToggle;
 
-  const CourseCard({
-    super.key,
-    required this.course,
-    required this.isFavorite,
-    required this.onFavoriteToggle,
-  });
+  const CourseCard({super.key, required this.course});
 
   @override
   Widget build(BuildContext context) {
+    final String courseCode = course['code'];
+
+    // 1. Gunakan watch() untuk memantau apakah course ini termasuk favorit
+    final bool isFavorite = context.watch<CourseProvider>().favorites.contains(
+      courseCode,
+    );
+
     return Card(
       elevation: 2,
       shadowColor: Colors.black12,
@@ -147,16 +145,17 @@ class CourseCard extends StatelessWidget {
                   ],
                 ),
               ),
+              // 2. Gunakan read() pada tombol toggle favorite (hanya memicu aksi tanpa listen)
               IconButton(
-                // Membaca state dari Parent
                 icon: Icon(
                   isFavorite
                       ? Icons.favorite_rounded
                       : Icons.favorite_outline_rounded,
                 ),
                 color: isFavorite ? Colors.pink.shade400 : Colors.grey.shade400,
-                // Memicu aksi callback menuju Parent!
-                onPressed: onFavoriteToggle,
+                onPressed: () {
+                  context.read<CourseProvider>().toggleFavorite(courseCode);
+                },
               ),
             ],
           ),
@@ -469,30 +468,6 @@ class _MainScreenState extends State<MainScreen> {
   int _currentIndex = 0;
   late Future<Map<String, dynamic>> _dataFuture;
 
-  // Menggunakan ValueNotifier
-  final ValueNotifier<Set<String>> _favoriteCourseCodes =
-      ValueNotifier<Set<String>>({});
-
-  @override
-  void dispose() {
-    _favoriteCourseCodes.dispose(); // Wajib di-dispose saat halaman ditutup
-    super.dispose();
-  }
-
-  void _toggleFavorite(String code) {
-    // Buat salinan set yang ada agar ValueNotifier mendeteksi perubahan referensi
-    final currentFavorites = Set<String>.from(_favoriteCourseCodes.value);
-
-    if (currentFavorites.contains(code)) {
-      currentFavorites.remove(code);
-    } else {
-      currentFavorites.add(code);
-    }
-
-    // Perbarui nilai notifier (ini otomatis memicu listener tanpa setState global!)
-    _favoriteCourseCodes.value = currentFavorites;
-  }
-
   @override
   void initState() {
     super.initState();
@@ -679,11 +654,10 @@ class _MainScreenState extends State<MainScreen> {
                         ),
                         const SizedBox(height: 12),
 
-                        ValueListenableBuilder<Set<String>>(
-                          valueListenable: _favoriteCourseCodes,
-                          builder: (context, favorites, child) {
+                        Consumer<CourseProvider>(
+                          builder: (context, provider, child) {
                             return Text(
-                              '${favorites.length}',
+                              '${provider.favorites.length}',
                               style: const TextStyle(
                                 fontSize: 28,
                                 fontWeight: FontWeight.bold,
@@ -711,19 +685,7 @@ class _MainScreenState extends State<MainScreen> {
         return ListView.builder(
           padding: const EdgeInsets.only(top: 8),
           itemCount: courses.length,
-          itemBuilder: (ctx, i) {
-            final courseCode = courses[i]['code'];
-            return ValueListenableBuilder<Set<String>>(
-              valueListenable: _favoriteCourseCodes,
-              builder: (context, favorites, child) {
-                return CourseCard(
-                  course: courses[i],
-                  isFavorite: favorites.contains(courseCode), // Cek dari .value
-                  onFavoriteToggle: () => _toggleFavorite(courseCode),
-                );
-              },
-            );
-          },
+          itemBuilder: (ctx, i) => CourseCard(course: courses[i]),
         );
       } else {
         return GridView.builder(
@@ -735,19 +697,7 @@ class _MainScreenState extends State<MainScreen> {
             mainAxisSpacing: 8,
           ),
           itemCount: courses.length,
-          itemBuilder: (ctx, i) {
-            final courseCode = courses[i]['code'];
-            return ValueListenableBuilder<Set<String>>(
-              valueListenable: _favoriteCourseCodes,
-              builder: (context, favorites, child) {
-                return CourseCard(
-                  course: courses[i],
-                  isFavorite: favorites.contains(courseCode), // Cek dari .value
-                  onFavoriteToggle: () => _toggleFavorite(courseCode),
-                );
-              },
-            );
-          },
+          itemBuilder: (ctx, i) => CourseCard(course: courses[i]),
         );
       }
     } else {
