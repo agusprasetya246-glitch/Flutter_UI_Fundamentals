@@ -468,31 +468,23 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   int _currentIndex = 0;
-  late Future<Map<String, dynamic>> _dataFuture;
-
-  // Inisialisasi service kita
-  final CourseService _courseService = CourseService();
 
   @override
   void initState() {
     super.initState();
-    _dataFuture = _courseService.loadStudentData(); // Mengambil JSON
-
-    _courseService.loadCourses().then((courses) {
-      debugPrint('BERHASIL UJI SERVICE: Ditemukan ${courses.length} course!');
-      for (var c in courses) {
-        debugPrint(' - ${c.title} (${c.credits} SKS)');
-      }
+    // Memanggil loadCourses melalui Provider secara aman setelah widget dirender
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<CourseProvider>().loadCourses();
     });
   }
 
   // Fungsi penyusun isi layar berdasarkan tab yang aktif
   Widget _buildBody(Map<String, dynamic> data, BoxConstraints constraints) {
     final student = data['student'];
-    final rawCourses = data['courses'] as List<dynamic>;
-    final List<Course> courses = rawCourses
-        .map((e) => Course.fromJson(e as Map<String, dynamic>))
-        .toList();
+
+    // Ambil data course langsung dari CourseProvider (Async State)
+    final courseProvider = context.watch<CourseProvider>();
+    final List<Course> courses = courseProvider.courses;
 
     if (_currentIndex == 0) {
       return SingleChildScrollView(
@@ -695,28 +687,56 @@ class _MainScreenState extends State<MainScreen> {
         ),
       );
     } else if (_currentIndex == 1) {
-      // TAB COURSES
-      if (constraints.maxWidth < 600) {
-        return ListView.builder(
-          padding: const EdgeInsets.only(top: 8),
-          itemCount: courses.length,
-          itemBuilder: (ctx, i) => CourseCard(course: courses[i]),
-        );
-      } else {
-        return GridView.builder(
-          padding: const EdgeInsets.all(16),
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            childAspectRatio: 3.5,
-            crossAxisSpacing: 8,
-            mainAxisSpacing: 8,
-          ),
-          itemCount: courses.length,
-          itemBuilder: (ctx, i) => CourseCard(course: courses[i]),
-        );
-      }
+      // TAB COURSES: Menangani Async State (Loading, Error, Success)
+      return Consumer<CourseProvider>(
+        builder: (context, provider, child) {
+          // 48. Tampilkan CircularProgressIndicator saat loading
+          if (provider.isLoading) {
+            return const Center(
+              child: CircularProgressIndicator(color: Colors.indigo),
+            );
+          }
+
+          // 49. Tampilkan pesan jika error tidak null
+          if (provider.error != null) {
+            return Center(
+              child: Text(
+                'Terjadi Kesalahan:\n${provider.error}',
+                textAlign: TextAlign.center,
+                style: const TextStyle(color: Colors.red),
+              ),
+            );
+          }
+
+          // 50. Tampilkan list jika data berhasil dimuat
+          final coursesList = provider.courses;
+          if (coursesList.isEmpty) {
+            return const Center(child: Text('Tidak ada data mata kuliah.'));
+          }
+
+          if (constraints.maxWidth < 600) {
+            return ListView.builder(
+              padding: const EdgeInsets.only(top: 8),
+              itemCount: coursesList.length,
+              itemBuilder: (ctx, i) => CourseCard(course: coursesList[i]),
+            );
+          } else {
+            return GridView.builder(
+              padding: const EdgeInsets.all(16),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                childAspectRatio: 3.5,
+                crossAxisSpacing: 8,
+                mainAxisSpacing: 8,
+              ),
+              itemCount: coursesList.length,
+              itemBuilder: (ctx, i) => CourseCard(course: coursesList[i]),
+            );
+          }
+        },
+      );
     } else {
-      // TAB PROFILE
+      // --- TAMBAHKAN BLOK ELSE INI UNTUK TAB PROFILE ---
       return SingleChildScrollView(
         child: Column(
           children: [
@@ -790,69 +810,57 @@ class _MainScreenState extends State<MainScreen> {
         backgroundColor: Colors.white,
         foregroundColor: Colors.indigo,
       ),
-      body: FutureBuilder<Map<String, dynamic>>(
-        future: _dataFuture,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(
-              child: CircularProgressIndicator(color: Colors.indigo),
-            );
-          }
-          if (snapshot.hasError) {
-            return const Center(child: Text('Error memuat data JSON'));
-          }
-          final data = snapshot.data!;
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          // Untuk sementara kita berikan map data student dasar agar UI tidak error
+          final Map<String, dynamic> dummyData = {
+            'student': {'name': studentName, 'nim': studentId},
+            'courses': [],
+          };
 
-          return LayoutBuilder(
-            builder: (context, constraints) {
-              // Adaptive Navigation: Layar Lebar pakai samping (Rail), layar sempit pakai konten penuh (Nanti bar di bawah)
-              if (constraints.maxWidth >= 840) {
-                return Row(
-                  children: [
-                    NavigationRail(
-                      backgroundColor: Colors.white,
-                      selectedIndex: _currentIndex,
-                      onDestinationSelected: (int index) =>
-                          setState(() => _currentIndex = index),
-                      labelType: NavigationRailLabelType.all,
-                      selectedIconTheme: const IconThemeData(
-                        color: Colors.indigo,
-                      ),
-                      selectedLabelTextStyle: const TextStyle(
-                        color: Colors.indigo,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      destinations: const [
-                        NavigationRailDestination(
-                          icon: Icon(Icons.home_outlined),
-                          selectedIcon: Icon(Icons.home_rounded),
-                          label: Text('Home'),
-                        ),
-                        NavigationRailDestination(
-                          icon: Icon(Icons.school_outlined),
-                          selectedIcon: Icon(Icons.school_rounded),
-                          label: Text('Courses'),
-                        ),
-                        NavigationRailDestination(
-                          icon: Icon(Icons.person_outline),
-                          selectedIcon: Icon(Icons.person_rounded),
-                          label: Text('Profile'),
-                        ),
-                      ],
+          if (constraints.maxWidth >= 840) {
+            return Row(
+              children: [
+                NavigationRail(
+                  backgroundColor: Colors.white,
+                  selectedIndex: _currentIndex,
+                  onDestinationSelected: (int index) =>
+                      setState(() => _currentIndex = index),
+                  labelType: NavigationRailLabelType.all,
+                  selectedIconTheme: const IconThemeData(color: Colors.indigo),
+                  selectedLabelTextStyle: const TextStyle(
+                    color: Colors.indigo,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  destinations: const [
+                    NavigationRailDestination(
+                      icon: Icon(Icons.home_outlined),
+                      selectedIcon: Icon(Icons.home_rounded),
+                      label: Text('Home'),
                     ),
-                    const VerticalDivider(
-                      thickness: 1,
-                      width: 1,
-                      color: Colors.black12,
+                    NavigationRailDestination(
+                      icon: Icon(Icons.school_outlined),
+                      selectedIcon: Icon(Icons.school_rounded),
+                      label: Text('Courses'),
                     ),
-                    Expanded(child: _buildBody(data, constraints)),
+                    NavigationRailDestination(
+                      icon: Icon(Icons.person_outline),
+                      selectedIcon: Icon(Icons.person_rounded),
+                      label: Text('Profile'),
+                    ),
                   ],
-                );
-              } else {
-                return _buildBody(data, constraints);
-              }
-            },
-          );
+                ),
+                const VerticalDivider(
+                  thickness: 1,
+                  width: 1,
+                  color: Colors.black12,
+                ),
+                Expanded(child: _buildBody(dummyData, constraints)),
+              ],
+            );
+          } else {
+            return _buildBody(dummyData, constraints);
+          }
         },
       ),
       bottomNavigationBar: LayoutBuilder(

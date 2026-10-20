@@ -8,34 +8,37 @@ class CourseProvider extends ChangeNotifier {
   // 1. Menyiapkan repository melalui dependency injection sederhana
   final CourseRepository repository = CourseRepository(CourseService());
 
-  // 2. Collection untuk favorites
-  final Set<String> _favorites = {};
-  Set<String> get favorites => _favorites;
-
-  // 3. Menyimpan daftar course hasil dari repository
   List<Course> _courses = [];
   List<Course> get courses => _courses;
 
+  // Status Async State
   bool _isLoading = false;
   bool get isLoading => _isLoading;
 
-  // 4. Method untuk memuat data via Repository (Poin 45: Provider memanggil repository, bukan rootBundle)
+  String? _error;
+  String? get error => _error;
+
+  final Set<String> _favorites = {};
+  Set<String> get favorites => _favorites;
+
+  // Implementasikan loadCourses()
   Future<void> loadCourses() async {
     _isLoading = true;
+    _error = null;
     notifyListeners();
 
+    await Future.delayed(const Duration(seconds: 5));
+
     try {
-      // Memanggil repository, bersih dari urusan rootBundle/jsonDecode!
       _courses = await repository.getCourses();
     } catch (e) {
-      debugPrint('Error loading courses: $e');
+      _error = e.toString(); // Menangkap pesan jika terjadi error
     } finally {
       _isLoading = false;
-      notifyListeners();
+      notifyListeners(); // Mengabari UI bahwa proses telah selesai (Success atau Error)
     }
   }
 
-  // Method toggle favorite seperti biasa
   void toggleFavorite(String id) {
     if (_favorites.contains(id)) {
       _favorites.remove(id);
