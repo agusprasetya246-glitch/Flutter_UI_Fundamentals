@@ -5,6 +5,7 @@ import 'package:flutter/services.dart' show rootBundle;
 import 'package:provider/provider.dart';
 
 import 'course_provider.dart';
+import 'models/course.dart';
 
 // Identitas Global
 const String studentName = 'Agus Prasetya';
@@ -53,15 +54,15 @@ class MyApp extends StatelessWidget {
 // TAHAP 3: LIFTING STATE UP & SINGLE SOURCE OF TRUTH
 // ============================================================================
 
-// --- COURSE CARD
+// --- COURSE CARD (Menggunakan Model Course) ---
 class CourseCard extends StatelessWidget {
-  final Map<String, dynamic> course;
+  final Course course; // <-- Sekarang bertipe Course, bukan Map lagi!
 
   const CourseCard({super.key, required this.course});
 
   @override
   Widget build(BuildContext context) {
-    final String courseCode = course['code'];
+    final String courseCode = course.code;
 
     // 1. Gunakan watch() untuk memantau apakah course ini termasuk favorit
     final bool isFavorite = context.watch<CourseProvider>().favorites.contains(
@@ -105,7 +106,7 @@ class CourseCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      course['title'],
+                      course.title, // <-- Menggunakan properti object Course
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
@@ -115,7 +116,7 @@ class CourseCard extends StatelessWidget {
                     Row(
                       children: [
                         Text(
-                          course['code'],
+                          course.code, // <-- Menggunakan properti object Course
                           style: TextStyle(
                             color: Colors.grey.shade700,
                             fontSize: 13,
@@ -132,7 +133,7 @@ class CourseCard extends StatelessWidget {
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Text(
-                            '${course['credits']} SKS',
+                            '${course.credits} SKS', // <-- Menggunakan properti object Course
                             style: TextStyle(
                               fontSize: 11,
                               fontWeight: FontWeight.bold,
@@ -140,12 +141,22 @@ class CourseCard extends StatelessWidget {
                             ),
                           ),
                         ),
+                        const SizedBox(width: 8),
+                        // Menampilkan status dari model Course
+                        Text(
+                          '• ${course.status}',
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.indigo.shade400,
+                          ),
+                        ),
                       ],
                     ),
                   ],
                 ),
               ),
-              // 2. Gunakan read() pada tombol toggle favorite (hanya memicu aksi tanpa listen)
+              // 2. Gunakan read() pada tombol toggle favorite
               IconButton(
                 icon: Icon(
                   isFavorite
@@ -360,7 +371,7 @@ class _FeedbackFormState extends State<FeedbackForm> {
 
 // --- 1. COURSE DETAIL PAGE ---
 class CourseDetailPage extends StatelessWidget {
-  final Map<String, dynamic> course;
+  final Course course; // <-- Sekarang bertipe Course!
   const CourseDetailPage({super.key, required this.course});
 
   Widget _buildInfoColumn(String label, String value, IconData icon) {
@@ -404,7 +415,7 @@ class CourseDetailPage extends StatelessWidget {
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    course['title'],
+                    course.title,
                     textAlign: TextAlign.center,
                     style: const TextStyle(
                       fontSize: 28,
@@ -423,15 +434,15 @@ class CourseDetailPage extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      _buildInfoColumn('Kode', course['code'], Icons.qr_code),
+                      _buildInfoColumn('Kode', course.code, Icons.qr_code),
                       _buildInfoColumn(
                         'SKS',
-                        '${course['credits']}',
+                        '${course.credits}',
                         Icons.star_border_rounded,
                       ),
                       _buildInfoColumn(
                         'Status',
-                        'Tersedia',
+                        course.status,
                         Icons.check_circle_outline,
                       ),
                     ],
@@ -443,7 +454,7 @@ class CourseDetailPage extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Mata kuliah ${course['title']} merupakan bagian dari kurikulum yang wajib diselesaikan.',
+                    'Mata kuliah ${course.title} merupakan bagian dari kurikulum yang wajib diselesaikan.',
                     style: TextStyle(color: Colors.grey.shade700, height: 1.5),
                   ),
                 ],
@@ -477,7 +488,10 @@ class _MainScreenState extends State<MainScreen> {
   // Fungsi penyusun isi layar berdasarkan tab yang aktif
   Widget _buildBody(Map<String, dynamic> data, BoxConstraints constraints) {
     final student = data['student'];
-    final courses = data['courses'] as List<dynamic>;
+    final rawCourses = data['courses'] as List<dynamic>;
+    final List<Course> courses = rawCourses
+        .map((e) => Course.fromJson(e as Map<String, dynamic>))
+        .toList();
 
     if (_currentIndex == 0) {
       return SingleChildScrollView(
