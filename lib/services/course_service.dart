@@ -4,11 +4,6 @@ import 'package:flutter/services.dart' show rootBundle;
 
 import '../models/course.dart';
 
-// ============================================================================
-// TAHAP 9: COURSE SERVICE (Data Source)
-// Identitas: 2415051039 - Agus Prasetya
-// ============================================================================
-
 class CourseService {
   // Membaca asset JSON dan mengembalikan dalam bentuk List<Course>
   Future<Map<String, dynamic>> loadStudentData() async {

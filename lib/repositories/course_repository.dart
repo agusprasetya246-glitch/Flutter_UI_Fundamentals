@@ -1,11 +1,6 @@
 import '../models/course.dart';
 import '../services/course_service.dart';
 
-// ============================================================================
-// TAHAP 10: COURSE REPOSITORY (Abstraksi Data)
-// Identitas: 2415051039 - Agus Prasetya
-// ============================================================================
-
 class CourseRepository {
   // Menerima CourseService melalui constructor (Dependency Injection)
   final CourseService service;
