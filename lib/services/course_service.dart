@@ -10,7 +10,7 @@ import '../models/course.dart';
 // ============================================================================
 
 class CourseService {
-  // 39 & 40. Membaca asset JSON dan mengembalikan dalam bentuk List<Course>
+  // Membaca asset JSON dan mengembalikan dalam bentuk List<Course>
   Future<Map<String, dynamic>> loadStudentData() async {
     final jsonString = await rootBundle.loadString(
       'assets/data/student_data.json',

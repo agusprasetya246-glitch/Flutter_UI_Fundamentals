@@ -1,22 +1,13 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart' show rootBundle;
 import 'package:provider/provider.dart';
 
 import 'course_provider.dart';
 import 'models/course.dart';
+import 'services/course_service.dart';
 
 // Identitas Global
 const String studentName = 'Agus Prasetya';
 const String studentId = '2415051039';
-
-Future<Map<String, dynamic>> loadStudentData() async {
-  final jsonString = await rootBundle.loadString(
-    'assets/data/student_data.json',
-  );
-  return jsonDecode(jsonString) as Map<String, dynamic>;
-}
 
 void main() {
   runApp(
@@ -479,10 +470,20 @@ class _MainScreenState extends State<MainScreen> {
   int _currentIndex = 0;
   late Future<Map<String, dynamic>> _dataFuture;
 
+  // Inisialisasi service kita
+  final CourseService _courseService = CourseService();
+
   @override
   void initState() {
     super.initState();
-    _dataFuture = loadStudentData(); // Mengambil JSON
+    _dataFuture = _courseService.loadStudentData(); // Mengambil JSON
+
+    _courseService.loadCourses().then((courses) {
+      debugPrint('BERHASIL UJI SERVICE: Ditemukan ${courses.length} course!');
+      for (var c in courses) {
+        debugPrint(' - ${c.title} (${c.credits} SKS)');
+      }
+    });
   }
 
   // Fungsi penyusun isi layar berdasarkan tab yang aktif
