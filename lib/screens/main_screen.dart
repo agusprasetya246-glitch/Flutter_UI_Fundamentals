@@ -5,6 +5,7 @@ import '../models/course.dart';
 import '../providers/course_provider.dart';
 import '../widgets/course_card.dart';
 import '../widgets/feedback_form.dart';
+import 'favorites_page.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -271,6 +272,8 @@ class _MainScreenState extends State<MainScreen> {
           }
         },
       );
+    } else if (_currentIndex == 2) {
+      return const FavoritesPage();
     } else {
       return SingleChildScrollView(
         child: Column(
@@ -373,6 +376,11 @@ class _MainScreenState extends State<MainScreen> {
                       label: Text('Courses'),
                     ),
                     NavigationRailDestination(
+                      icon: Icon(Icons.favorite_outline),
+                      selectedIcon: Icon(Icons.favorite_rounded),
+                      label: Text('Favorites'),
+                    ),
+                    NavigationRailDestination(
                       icon: Icon(Icons.person_outline),
                       selectedIcon: Icon(Icons.person_rounded),
                       label: Text('Profile'),
@@ -416,6 +424,14 @@ class _MainScreenState extends State<MainScreen> {
                     color: Colors.indigo,
                   ),
                   label: 'Courses',
+                ),
+                NavigationDestination(
+                  icon: Icon(Icons.favorite_outline),
+                  selectedIcon: Icon(
+                    Icons.favorite_rounded,
+                    color: Colors.indigo,
+                  ),
+                  label: 'Favorites',
                 ),
                 NavigationDestination(
                   icon: Icon(Icons.person_outline),

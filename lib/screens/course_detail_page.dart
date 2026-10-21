@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 
 import '../models/course.dart';
 
+import 'package:provider/provider.dart';
+
+import '../providers/course_provider.dart';
+
 class CourseDetailPage extends StatelessWidget {
   final Course course;
   const CourseDetailPage({super.key, required this.course});
@@ -25,11 +29,27 @@ class CourseDetailPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final courseProvider = context.watch<CourseProvider>();
+    final bool isFavorite = courseProvider.favorites.contains(course.code);
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Detail Course'),
         centerTitle: true,
         elevation: 0,
+        actions: [
+          IconButton(
+            icon: Icon(
+              isFavorite
+                  ? Icons.favorite_rounded
+                  : Icons.favorite_outline_rounded,
+              color: isFavorite ? Colors.pink.shade400 : Colors.grey.shade400,
+            ),
+            onPressed: () {
+              context.read<CourseProvider>().toggleFavorite(course.code);
+            },
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         child: Column(
