@@ -1,19 +1,19 @@
-# flutter_ui_fundamentals
+# Course Explorer v2 - State Management & Architecture
 
-A new Flutter project.
+* **Nama:** Agus Prasetya
+* **NIM:** 2415051039
+* **Kelas:** PTI-5B
 
-## Getting Started
+## Arah Dependency (Dependency Direction)
+`Screen / Widget` ➔ `Provider` ➔ `Repository` ➔ `Service / Data Source`
 
-This project is a starting point for a Flutter application.
+UI tidak memanggil `rootBundle` atau `jsonDecode` secara langsung, melainkan hanya membaca *state* dan memicu aksi melalui `CourseProvider`.
 
-A few resources to get you started if this is your first Flutter project:
+## Tanggung Jawab Setiap Folder (`lib/`)
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
-
-Worksheeet 6 tahap 14
+* **`models/` (`course.dart`)**: Menyimpan representasi struktur data aplikasi (`Course`) yang *type-safe* beserta fungsi *parsing* `Course.fromJson()` untuk mengubah Map JSON menjadi objek Dart.
+* **`services/` (`course_service.dart`)**: Bertanggung jawab penuh terhadap detail teknis pengambilan data mentah dari sumber data lokal (`rootBundle.loadString` dan `jsonDecode` pada file asset JSON) tanpa mencampurkannya dengan logika UI.
+* **`repositories/` (`course_repository.dart`)**: Menjadi lapisan abstraksi (*jembatan*) antara `CourseProvider` dan `CourseService`. Menyediakan *method* `getCourses()` sehingga *Provider* tidak perlu mengetahui dari mana data berasal (JSON lokal, API, atau database).
+* **`providers/` (`course_provider.dart`)**: Mengelola *shared state* / *application state* berbasis `ChangeNotifier` (daftar `courses`, koleksi `favorites`, status `isLoading`, dan `error`) serta memberi sinyal pembaruan ke UI melalui `notifyListeners()`.
+* **`screens/` (`main_screen.dart`, `course_detail_page.dart`, `favorites_page.dart`)**: Berisi halaman-halaman utama aplikasi yang menampilkan antarmuka pengguna (UI) secara utuh dan mendengarkan perubahan *state* dari *Provider*.
+* **`widgets/` (`course_card.dart`, `feedback_form.dart`)**: Menyimpan komponen-komponen UI modular berukuran kecil yang spesifik dan dapat digunakan kembali (*reusable*) di berbagai *screen*.
