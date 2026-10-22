@@ -43,3 +43,4 @@ class CourseProvider extends ChangeNotifier {
     notifyListeners();
   }
 }
+// Tahap 15: Pastikan notifyListeners() selalu dipanggil agar UI rebuild)
