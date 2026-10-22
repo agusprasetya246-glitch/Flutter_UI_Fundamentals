@@ -17,3 +17,6 @@ UI tidak memanggil `rootBundle` atau `jsonDecode` secara langsung, melainkan han
 * **`providers/` (`course_provider.dart`)**: Mengelola *shared state* / *application state* berbasis `ChangeNotifier` (daftar `courses`, koleksi `favorites`, status `isLoading`, dan `error`) serta memberi sinyal pembaruan ke UI melalui `notifyListeners()`.
 * **`screens/` (`main_screen.dart`, `course_detail_page.dart`, `favorites_page.dart`)**: Berisi halaman-halaman utama aplikasi yang menampilkan antarmuka pengguna (UI) secara utuh dan mendengarkan perubahan *state* dari *Provider*.
 * **`widgets/` (`course_card.dart`, `feedback_form.dart`)**: Menyimpan komponen-komponen UI modular berukuran kecil yang spesifik dan dapat digunakan kembali (*reusable*) di berbagai *screen*.
+
+---
+*Status Praktikum: Selesai (Tahap 0 - Tahap 17)*
