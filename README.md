@@ -19,4 +19,4 @@ UI tidak memanggil `rootBundle` atau `jsonDecode` secara langsung, melainkan han
 * **`widgets/` (`course_card.dart`, `feedback_form.dart`)**: Menyimpan komponen-komponen UI modular berukuran kecil yang spesifik dan dapat digunakan kembali (*reusable*) di berbagai *screen*.
 
 ---
-*Status Praktikum: Selesai (Tahap 0 - Tahap 17)*
+**Status Praktikum: Selesai (Tahap 0 - Tahap 17)*
