@@ -76,4 +76,21 @@ class CourseProvider extends ChangeNotifier {
       notifyListeners();
     }
   }
+
+  // Tahap 8 (Poin 49 & 51): Hapus course, bersihkan dari favorites, lalu refresh list
+  Future<void> deleteCourse(int id, String code) async {
+    _isSaving = true;
+    notifyListeners();
+
+    try {
+      await repository.deleteCourse(id);
+      // Jika course yang dihapus ada di favorites, hapus juga dari favorites
+      _favorites.remove(code);
+      // Refresh list setelah berhasil dihapus
+      await loadCourses();
+    } finally {
+      _isSaving = false;
+      notifyListeners();
+    }
+  }
 }

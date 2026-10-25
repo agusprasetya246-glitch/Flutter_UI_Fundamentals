@@ -5,12 +5,66 @@ import '../models/course.dart';
 import 'package:provider/provider.dart';
 
 import '../providers/course_provider.dart';
-
 import '../screens/course_form_page.dart';
 
 class CourseDetailPage extends StatelessWidget {
   final Course course;
   const CourseDetailPage({super.key, required this.course});
+  Future<void> _confirmDelete(BuildContext context) async {
+    if (course.id == null) return;
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Hapus Course'),
+        content: Text(
+          'Apakah Anda yakin ingin menghapus "${course.title}" (${course.code})?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Batal'),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+            ),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Hapus'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true || !context.mounted) return;
+
+    try {
+      await context.read<CourseProvider>().deleteCourse(
+        course.id!,
+        course.code,
+      );
+
+      if (!context.mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Course ${course.code} berhasil dihapus!'),
+          backgroundColor: Colors.green,
+        ),
+      );
+      Navigator.pop(context); // Kembali ke daftar setelah berhasil dihapus
+    } catch (e) {
+      if (!context.mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Gagal menghapus course: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
 
   Widget _buildInfoColumn(String label, String value, IconData icon) {
     return Column(
@@ -62,6 +116,11 @@ class CourseDetailPage extends StatelessWidget {
                 ),
               );
             },
+          ),
+          IconButton(
+            icon: const Icon(Icons.delete_outline, color: Colors.red),
+            tooltip: 'Hapus Course',
+            onPressed: () => _confirmDelete(context),
           ),
         ],
       ),

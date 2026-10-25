@@ -19,4 +19,9 @@ class CourseRepository {
   Future<void> updateCourse(int id, Course course) async {
     await apiService.updateCourse(id, course);
   }
+
+  // Tahap 8: Teruskan request DELETE ke CourseApiService
+  Future<void> deleteCourse(int id) async {
+    await apiService.deleteCourse(id);
+  }
 }
