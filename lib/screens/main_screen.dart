@@ -8,6 +8,7 @@ import '../widgets/course_card.dart';
 import '../widgets/error_view.dart';
 import '../widgets/feedback_form.dart';
 import 'favorites_page.dart';
+import 'course_form_page.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -327,6 +328,20 @@ class _MainScreenState extends State<MainScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      floatingActionButton: _currentIndex == 1
+          ? FloatingActionButton.extended(
+              backgroundColor: Colors.indigo,
+              foregroundColor: Colors.white,
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const CourseFormPage()),
+                );
+              },
+              icon: const Icon(Icons.add),
+              label: const Text('Tambah Course'),
+            )
+          : null,
       backgroundColor: Colors.grey.shade50,
       appBar: AppBar(
         title: const Text(

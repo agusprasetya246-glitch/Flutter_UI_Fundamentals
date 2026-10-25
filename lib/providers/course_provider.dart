@@ -5,7 +5,6 @@ import '../models/course.dart';
 import '../repositories/course_repository.dart';
 
 class CourseProvider extends ChangeNotifier {
-  // Menerima repository melalui constructor (Dependency Injection)
   CourseProvider(this.repository);
 
   final CourseRepository repository;
@@ -15,6 +14,10 @@ class CourseProvider extends ChangeNotifier {
 
   bool _isLoading = false;
   bool get isLoading => _isLoading;
+
+  // Flag isSaving untuk mencegah submit ganda selama request berjalan
+  bool _isSaving = false;
+  bool get isSaving => _isSaving;
 
   String? _error;
   String? get error => _error;
@@ -33,6 +36,20 @@ class CourseProvider extends ChangeNotifier {
       _error = e.toString();
     } finally {
       _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  // Buat course melalui repository lalu refresh list dengan loadCourses()
+  Future<void> createCourse(Course course) async {
+    _isSaving = true;
+    notifyListeners();
+
+    try {
+      await repository.createCourse(course);
+      await loadCourses(); // ganti isi list dari server
+    } finally {
+      _isSaving = false;
       notifyListeners();
     }
   }
