@@ -6,7 +6,9 @@ import '../models/course.dart';
 import '../providers/course_provider.dart';
 
 class CourseFormPage extends StatefulWidget {
-  const CourseFormPage({super.key});
+  final Course? initialCourse;
+
+  const CourseFormPage({super.key, this.initialCourse});
 
   @override
   State<CourseFormPage> createState() => _CourseFormPageState();
@@ -14,10 +16,25 @@ class CourseFormPage extends StatefulWidget {
 
 class _CourseFormPageState extends State<CourseFormPage> {
   final _formKey = GlobalKey<FormState>();
-  final _codeController = TextEditingController();
-  final _titleController = TextEditingController();
-  final _creditsController = TextEditingController();
-  String _selectedStatus = 'planned';
+  late final TextEditingController _codeController;
+  late final TextEditingController _titleController;
+  late final TextEditingController _creditsController;
+  late String _selectedStatus;
+
+  bool get isEdit => widget.initialCourse != null;
+
+  @override
+  void initState() {
+    super.initState();
+    // Isi form edit dengan data lama jika dalam mode edit
+    final c = widget.initialCourse;
+    _codeController = TextEditingController(text: c?.code ?? '');
+    _titleController = TextEditingController(text: c?.title ?? '');
+    _creditsController = TextEditingController(
+      text: c != null ? c.credits.toString() : '',
+    );
+    _selectedStatus = c?.status ?? 'planned';
+  }
 
   @override
   void dispose() {
@@ -28,10 +45,10 @@ class _CourseFormPageState extends State<CourseFormPage> {
   }
 
   Future<void> _submit(BuildContext context) async {
-    // Validasi form
     if (!_formKey.currentState!.validate()) return;
 
-    final newCourse = Course(
+    final courseData = Course(
+      id: widget.initialCourse?.id,
       code: _codeController.text.trim().toUpperCase(),
       title: _titleController.text.trim(),
       credits: int.parse(_creditsController.text.trim()),
@@ -41,24 +58,30 @@ class _CourseFormPageState extends State<CourseFormPage> {
     final provider = context.read<CourseProvider>();
 
     try {
-      await provider.createCourse(newCourse);
+      if (isEdit) {
+        // Kirim perubahan menggunakan PUT
+        await provider.updateCourse(widget.initialCourse!.id!, courseData);
+      } else {
+        await provider.createCourse(courseData);
+      }
 
       // Periksa context.mounted setelah await
       if (!context.mounted) return;
 
-      // Tampilkan SnackBar berhasil
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Course berhasil ditambahkan!'),
+        SnackBar(
+          content: Text(
+            isEdit
+                ? 'Course berhasil diperbarui!'
+                : 'Course berhasil ditambahkan!',
+          ),
           backgroundColor: Colors.green,
         ),
       );
-      Navigator.pop(context);
+      Navigator.pop(context, courseData);
     } catch (e) {
-      // Periksa context.mounted setelah await
       if (!context.mounted) return;
 
-      // Poin 38: Tampilkan SnackBar gagal
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Gagal menyimpan: $e'),
@@ -74,7 +97,9 @@ class _CourseFormPageState extends State<CourseFormPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Tambah Course (2415051039)'),
+        title: Text(
+          isEdit ? 'Edit Course (2415051039)' : 'Tambah Course (2415051039)',
+        ),
         backgroundColor: Colors.white,
         foregroundColor: Colors.indigo,
         elevation: 0,
@@ -94,11 +119,17 @@ class _CourseFormPageState extends State<CourseFormPage> {
                 ),
               ),
               const SizedBox(height: 16),
+              // Poin 42: Field code dibuat read-only saat mode Edit
               TextFormField(
                 controller: _codeController,
-                decoration: const InputDecoration(
-                  labelText: 'Kode Course (contoh: MOB39)',
-                  border: OutlineInputBorder(),
+                readOnly: isEdit,
+                decoration: InputDecoration(
+                  labelText: 'Kode Course',
+                  helperText: isEdit
+                      ? 'Kode bersifat read-only (kunci favorites)'
+                      : null,
+                  filled: isEdit,
+                  border: const OutlineInputBorder(),
                 ),
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) {
@@ -159,7 +190,7 @@ class _CourseFormPageState extends State<CourseFormPage> {
                 },
               ),
               const SizedBox(height: 24),
-              // Poin 37: Nonaktifkan tombol Simpan & tampilkan loading saat isSaving
+              // Guard submit ganda selama request berjalan
               ElevatedButton(
                 onPressed: isSaving ? null : () => _submit(context),
                 style: ElevatedButton.styleFrom(
@@ -176,7 +207,7 @@ class _CourseFormPageState extends State<CourseFormPage> {
                           color: Colors.white,
                         ),
                       )
-                    : const Text('Simpan Course'),
+                    : Text(isEdit ? 'Simpan Perubahan' : 'Simpan Course'),
               ),
             ],
           ),

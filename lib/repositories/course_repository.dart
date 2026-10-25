@@ -14,4 +14,9 @@ class CourseRepository {
   Future<Course> createCourse(Course course) async {
     return await apiService.createCourse(course);
   }
+
+  // Tahap 7: Teruskan request PUT ke CourseApiService
+  Future<void> updateCourse(int id, Course course) async {
+    await apiService.updateCourse(id, course);
+  }
 }

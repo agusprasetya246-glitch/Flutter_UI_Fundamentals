@@ -62,4 +62,18 @@ class CourseProvider extends ChangeNotifier {
     }
     notifyListeners();
   }
+
+  // Tahap 7: Update course lalu refresh list dengan loadCourses()
+  Future<void> updateCourse(int id, Course course) async {
+    _isSaving = true;
+    notifyListeners();
+
+    try {
+      await repository.updateCourse(id, course);
+      await loadCourses();
+    } finally {
+      _isSaving = false;
+      notifyListeners();
+    }
+  }
 }

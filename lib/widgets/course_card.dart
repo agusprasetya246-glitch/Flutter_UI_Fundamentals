@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../models/course.dart';
 import '../providers/course_provider.dart';
 import '../screens/course_detail_page.dart';
+import '../screens/course_form_page.dart';
 
 class CourseCard extends StatelessWidget {
   final Course course;
@@ -112,6 +113,18 @@ class CourseCard extends StatelessWidget {
                 color: isFavorite ? Colors.pink.shade400 : Colors.grey.shade400,
                 onPressed: () {
                   context.read<CourseProvider>().toggleFavorite(courseCode);
+                },
+              ),
+              IconButton(
+                icon: const Icon(Icons.edit_outlined, color: Colors.indigo),
+                tooltip: 'Edit Course',
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => CourseFormPage(initialCourse: course),
+                    ),
+                  );
                 },
               ),
             ],

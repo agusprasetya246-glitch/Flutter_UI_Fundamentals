@@ -6,6 +6,8 @@ import 'package:provider/provider.dart';
 
 import '../providers/course_provider.dart';
 
+import '../screens/course_form_page.dart';
+
 class CourseDetailPage extends StatelessWidget {
   final Course course;
   const CourseDetailPage({super.key, required this.course});
@@ -47,6 +49,18 @@ class CourseDetailPage extends StatelessWidget {
             ),
             onPressed: () {
               context.read<CourseProvider>().toggleFavorite(course.code);
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.edit_outlined, color: Colors.indigo),
+            tooltip: 'Edit Course',
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => CourseFormPage(initialCourse: course),
+                ),
+              );
             },
           ),
         ],
