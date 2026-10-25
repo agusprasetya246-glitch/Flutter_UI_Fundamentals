@@ -18,5 +18,17 @@ UI tidak memanggil `rootBundle` atau `jsonDecode` secara langsung, melainkan han
 * **`screens/` (`main_screen.dart`, `course_detail_page.dart`, `favorites_page.dart`)**: Berisi halaman-halaman utama aplikasi yang menampilkan antarmuka pengguna (UI) secara utuh dan mendengarkan perubahan *state* dari *Provider*.
 * **`widgets/` (`course_card.dart`, `feedback_form.dart`)**: Menyimpan komponen-komponen UI modular berukuran kecil yang spesifik dan dapat digunakan kembali (*reusable*) di berbagai *screen*.
 
----
-**Status Praktikum: Selesai (Tahap 0 - Tahap 17)*
+## Dokumentasi REST Endpoint (Pertemuan 7 - Tahap 1)
+* **Mahasiswa:** Agus Prasetya (2415051039)
+* **Base URL (`apiBaseUrl`):** `https://course-api-pearl.vercel.app`
+* **Endpoint GET:** `https://course-api-pearl.vercel.app/courses`
+* **HTTP Method:** `GET`
+* **Status Code:** `200 OK`
+* **Resource:** `courses`
+
+## Daftar Field JSON pada Resource `courses`:
+1. `id` (number/int) : Identifier unik course
+2. `code` (string) : Kode mata kuliah (contoh: `"MOB01"`)
+3. `title` (string) : Nama mata kuliah (contoh: `"Git & GitHub"`)
+4. `credits` (number/int) : Jumlah SKS (contoh: `2`)
+5. `status` (string) : Status course (`"planned"`, `"active"`, atau `"done"`)
