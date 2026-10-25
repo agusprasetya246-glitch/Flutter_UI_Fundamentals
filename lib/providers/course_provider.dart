@@ -1,11 +1,14 @@
+// NIM: 2415051039 | Nama: Agus Prasetya
 import 'package:flutter/foundation.dart';
 
 import '../models/course.dart';
 import '../repositories/course_repository.dart';
-import '../services/course_service.dart';
 
 class CourseProvider extends ChangeNotifier {
-  final CourseRepository repository = CourseRepository(CourseService());
+  // Menerima repository melalui constructor (Dependency Injection)
+  CourseProvider(this.repository);
+
+  final CourseRepository repository;
 
   List<Course> _courses = [];
   List<Course> get courses => _courses;
@@ -43,4 +46,3 @@ class CourseProvider extends ChangeNotifier {
     notifyListeners();
   }
 }
-// Tahap 15: Pastikan notifyListeners() selalu dipanggil agar UI rebuild)

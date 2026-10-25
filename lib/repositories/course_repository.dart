@@ -1,14 +1,12 @@
+// NIM: 2415051039 | Nama: Agus Prasetya
 import '../models/course.dart';
-import '../services/course_service.dart';
+import '../services/course_api_service.dart';
 
 class CourseRepository {
-  // Menerima CourseService melalui constructor (Dependency Injection)
-  final CourseService service;
+  CourseRepository(this.apiService);
+  final CourseApiService apiService;
 
-  CourseRepository(this.service);
-
-  // Membuat method getCourses() sebagai API data sederhana bagi Provider
-  Future<List<Course>> getCourses() {
-    return service.loadCourses();
+  Future<List<Course>> getCourses() async {
+    return await apiService.getCourses();
   }
 }
