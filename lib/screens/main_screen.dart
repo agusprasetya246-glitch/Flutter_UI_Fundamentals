@@ -1,9 +1,11 @@
+// NIM: 2415051039 | Nama: Agus Prasetya
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../models/course.dart';
 import '../providers/course_provider.dart';
 import '../widgets/course_card.dart';
+import '../widgets/error_view.dart';
 import '../widgets/feedback_form.dart';
 import 'favorites_page.dart';
 
@@ -16,14 +18,6 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   int _currentIndex = 0;
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<CourseProvider>().loadCourses();
-    });
-  }
 
   Widget _buildBody(BoxConstraints constraints) {
     // Data Mahasiswa dari Global Identitas
@@ -228,50 +222,46 @@ class _MainScreenState extends State<MainScreen> {
         ),
       );
     } else if (_currentIndex == 1) {
-      return Consumer<CourseProvider>(
-        builder: (context, provider, child) {
-          if (provider.isLoading) {
-            return const Center(
-              child: CircularProgressIndicator(color: Colors.indigo),
-            );
-          }
+      // Tahap 5: Loading, Error (ErrorView + Retry), Empty, dan Success State
+      final provider = context.watch<CourseProvider>();
 
-          if (provider.error != null) {
-            return Center(
-              child: Text(
-                'Terjadi Kesalahan:\n${provider.error}',
-                textAlign: TextAlign.center,
-                style: const TextStyle(color: Colors.red),
-              ),
-            );
-          }
+      if (provider.isLoading) {
+        return const Center(
+          child: CircularProgressIndicator(color: Colors.indigo),
+        );
+      }
 
-          final coursesList = provider.courses;
-          if (coursesList.isEmpty) {
-            return const Center(child: Text('Tidak ada data mata kuliah.'));
-          }
+      if (provider.error != null) {
+        return ErrorView(
+          message: provider.error!,
+          onRetry: provider.loadCourses,
+        );
+      }
 
-          if (constraints.maxWidth < 600) {
-            return ListView.builder(
-              padding: const EdgeInsets.only(top: 8),
-              itemCount: coursesList.length,
-              itemBuilder: (ctx, i) => CourseCard(course: coursesList[i]),
-            );
-          } else {
-            return GridView.builder(
-              padding: const EdgeInsets.all(16),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                childAspectRatio: 3.5,
-                crossAxisSpacing: 8,
-                mainAxisSpacing: 8,
-              ),
-              itemCount: coursesList.length,
-              itemBuilder: (ctx, i) => CourseCard(course: coursesList[i]),
-            );
-          }
-        },
-      );
+      if (provider.courses.isEmpty) {
+        return const Center(child: Text('Data course belum tersedia'));
+      }
+
+      final coursesList = provider.courses;
+      if (constraints.maxWidth < 600) {
+        return ListView.builder(
+          padding: const EdgeInsets.only(top: 8),
+          itemCount: coursesList.length,
+          itemBuilder: (ctx, i) => CourseCard(course: coursesList[i]),
+        );
+      } else {
+        return GridView.builder(
+          padding: const EdgeInsets.all(16),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            childAspectRatio: 3.5,
+            crossAxisSpacing: 8,
+            mainAxisSpacing: 8,
+          ),
+          itemCount: coursesList.length,
+          itemBuilder: (ctx, i) => CourseCard(course: coursesList[i]),
+        );
+      }
     } else if (_currentIndex == 2) {
       return const FavoritesPage();
     } else {

@@ -5,7 +5,7 @@ import 'package:provider/provider.dart';
 import 'providers/course_provider.dart';
 import 'repositories/course_repository.dart';
 import 'screens/main_screen.dart';
-import 'services/course_api_service.dart'; // Ganti service lama dengan API service
+import 'services/course_api_service.dart';
 
 const String studentName = 'Agus Prasetya';
 const String studentId = '2415051039';
