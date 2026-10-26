@@ -1,27 +1,18 @@
 // NIM: 2415051039 | Nama: Agus Prasetya
 import '../models/course.dart';
-import '../services/course_api_service.dart';
+import '../services/course_data_source.dart';
 
 class CourseRepository {
-  CourseRepository(this.apiService);
-  final CourseApiService apiService;
+  CourseRepository(this.dataSource);
 
-  Future<List<Course>> getCourses() async {
-    return await apiService.getCourses();
-  }
+  final CourseDataSource dataSource;
 
-  // Tahap 6: Teruskan request POST ke CourseApiService
-  Future<Course> createCourse(Course course) async {
-    return await apiService.createCourse(course);
-  }
+  Future<List<Course>> getCourses() => dataSource.getCourses();
 
-  // Tahap 7: Teruskan request PUT ke CourseApiService
-  Future<void> updateCourse(int id, Course course) async {
-    await apiService.updateCourse(id, course);
-  }
+  Future<Course> createCourse(Course course) => dataSource.createCourse(course);
 
-  // Tahap 8: Teruskan request DELETE ke CourseApiService
-  Future<void> deleteCourse(int id) async {
-    await apiService.deleteCourse(id);
-  }
+  Future<void> updateCourse(int id, Course course) =>
+      dataSource.updateCourse(id, course);
+
+  Future<void> deleteCourse(int id) => dataSource.deleteCourse(id);
 }

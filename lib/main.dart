@@ -16,13 +16,11 @@ const String apiBaseUrl = 'https://course-api-pearl.vercel.app';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Inisialisasi arsitektur: Service -> Repository -> Provider
-  final apiService = CourseApiService(apiBaseUrl);
-  final courseRepository = CourseRepository(apiService);
+  final repository = CourseRepository(CourseApiService(apiBaseUrl));
 
   runApp(
     ChangeNotifierProvider(
-      create: (_) => CourseProvider(courseRepository)..loadCourses(),
+      create: (_) => CourseProvider(repository)..loadCourses(),
       child: const MyApp(),
     ),
   );

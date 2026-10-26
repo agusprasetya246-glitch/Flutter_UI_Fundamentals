@@ -119,7 +119,7 @@ class _CourseFormPageState extends State<CourseFormPage> {
                 ),
               ),
               const SizedBox(height: 16),
-              // Poin 42: Field code dibuat read-only saat mode Edit
+              // Field code dibuat read-only saat mode Edit
               TextFormField(
                 controller: _codeController,
                 readOnly: isEdit,
