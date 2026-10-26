@@ -7,15 +7,21 @@ import 'repositories/course_repository.dart';
 import 'screens/main_screen.dart';
 import 'services/course_api_service.dart';
 
+import 'package:supabase_flutter/supabase_flutter.dart';
+
+import 'config/supabase_config.dart';
+
 const String studentName = 'Agus Prasetya';
 const String studentId = '2415051039';
-
-// Base URL sesuai koleksi Postman
 const String apiBaseUrl = 'https://course-api-pearl.vercel.app';
 
-void main() async {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  await Supabase.initialize(
+    url: SupabaseConfig.supabaseUrl,
+    anonKey: SupabaseConfig.supabaseAnonKey,
+  );
   final repository = CourseRepository(CourseApiService(apiBaseUrl));
 
   runApp(
