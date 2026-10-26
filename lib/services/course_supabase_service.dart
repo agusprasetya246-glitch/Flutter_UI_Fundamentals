@@ -18,9 +18,17 @@ class CourseSupabaseService implements CourseDataSource {
         .toList();
   }
 
-  // Sementara agar kelas tetap dapat dikompilasi
+  // Tahap 13: Ganti stub createCourse pada CourseSupabaseService
   @override
-  Future<Course> createCourse(Course course) => throw UnimplementedError();
+  Future<Course> createCourse(Course course) async {
+    final row = await supabase
+        .from('courses')
+        .insert(course.toJson())
+        .select()
+        .single();
+
+    return Course.fromJson(row);
+  }
 
   @override
   Future<void> updateCourse(int id, Course course) =>
