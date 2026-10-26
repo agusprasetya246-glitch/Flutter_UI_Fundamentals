@@ -10,6 +10,7 @@ import 'services/course_api_service.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'config/supabase_config.dart';
+import 'services/course_supabase_service.dart';
 
 const String studentName = 'Agus Prasetya';
 const String studentId = '2415051039';
@@ -22,7 +23,7 @@ Future<void> main() async {
     url: SupabaseConfig.supabaseUrl,
     publishableKey: SupabaseConfig.supabaseAnonKey,
   );
-  final repository = CourseRepository(CourseApiService(apiBaseUrl));
+  final repository = CourseRepository(CourseSupabaseService());
 
   runApp(
     ChangeNotifierProvider(
