@@ -33,4 +33,23 @@ UI tidak memanggil `rootBundle` atau `jsonDecode` secara langsung, melainkan han
 4. `credits` (number/int) : Jumlah SKS (contoh: `2`)
 5. `status` (string) : Status course (`"planned"`, `"active"`, atau `"done"`)
 
-// Tahap 17: Validasi error handling, penanganan network failure, dan security check
+## 1. Deskripsi Aplikasi
+Aplikasi Course Data Manager adalah aplikasi mobile berbasis Flutter untuk manajemen data mata kuliah (Course). Aplikasi ini mendukung operasi CRUD lengkap (Create, Read, Update, Delete) dengan penanganan multi-state (loading, error, empty, data view), validasi form, serta dialog konfirmasi interaktif.
+
+## 2. Arsitektur Singkat
+Aplikasi dirancang menggunakan **Repository Pattern** dengan pemisahan dependensi yang bersih:
+- **Presentation Layer (UI):** Menampilkan data dan menerima interaksi pengguna (`screens/` dan `widgets/`).
+- **State Management:** Menggunakan `Provider` (`ChangeNotifierProvider`) untuk manajemen state reaktif tanpa ketergantungan langsung ke database.
+- **Repository Layer:** `CourseRepository` bertindak sebagai *single source of truth* dan perantara antara logic aplikasi dengan data source.
+- **Data Source Layer:** Antarmuka abstrak `CourseDataSource` diimplementasikan secara terpisah oleh:
+  - `CourseApiService`: Berkomunikasi dengan REST API Vercel via HTTP.
+  - `CourseSupabaseService`: Berkomunikasi langsung dengan database PostgreSQL Supabase via SDK `supabase_flutter`.
+
+## 3. Backend yang Digunakan
+1. **REST API (Vercel):** `https://course-api-pearl.vercel.app`
+2. **BaaS / Database (Supabase):** Layanan PostgreSQL cloud Supabase dengan fitur Row Level Security (RLS) serta pembatasan *CHECK constraint* pada status mata kuliah (`planned`, `active`, `done`).
+
+## 4. Cara Menjalankan Aplikasi
+1. Clone repository ini:
+   ```bash
+   git clone [https://github.com/agusprasetya246-glitch/Flutter_UI_Fundamentals.git](https://github.com/agusprasetya246-glitch/Flutter_UI_Fundamentals.git)
