@@ -36,6 +36,9 @@ class CourseSupabaseService implements CourseDataSource {
     await supabase.from('courses').update(course.toJson()).eq('id', id);
   }
 
+  // Tahap 15: Ganti stub deleteCourse pada CourseSupabaseService
   @override
-  Future<void> deleteCourse(int id) => throw UnimplementedError();
+  Future<void> deleteCourse(int id) async {
+    await supabase.from('courses').delete().eq('id', id);
+  }
 }
