@@ -32,3 +32,5 @@ UI tidak memanggil `rootBundle` atau `jsonDecode` secara langsung, melainkan han
 3. `title` (string) : Nama mata kuliah (contoh: `"Git & GitHub"`)
 4. `credits` (number/int) : Jumlah SKS (contoh: `2`)
 5. `status` (string) : Status course (`"planned"`, `"active"`, atau `"done"`)
+
+// Tahap 17: Validasi error handling, penanganan network failure, dan security check
