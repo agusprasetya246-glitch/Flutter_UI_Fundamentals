@@ -30,9 +30,11 @@ class CourseSupabaseService implements CourseDataSource {
     return Course.fromJson(row);
   }
 
+  // Tahap 14: Ganti stub updateCourse pada CourseSupabaseService
   @override
-  Future<void> updateCourse(int id, Course course) =>
-      throw UnimplementedError();
+  Future<void> updateCourse(int id, Course course) async {
+    await supabase.from('courses').update(course.toJson()).eq('id', id);
+  }
 
   @override
   Future<void> deleteCourse(int id) => throw UnimplementedError();
