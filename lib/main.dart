@@ -5,16 +5,15 @@ import 'package:provider/provider.dart';
 import 'providers/course_provider.dart';
 import 'repositories/course_repository.dart';
 import 'screens/main_screen.dart';
-import 'services/course_api_service.dart';
 
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'config/supabase_config.dart';
 import 'services/course_supabase_service.dart';
+import 'services/course_data_source.dart';
 
 const String studentName = 'Agus Prasetya';
 const String studentId = '2415051039';
-const String apiBaseUrl = 'https://course-api-pearl.vercel.app';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -23,7 +22,9 @@ Future<void> main() async {
     url: SupabaseConfig.supabaseUrl,
     publishableKey: SupabaseConfig.supabaseAnonKey,
   );
-  final repository = CourseRepository(CourseSupabaseService());
+
+  final CourseDataSource dataSource = CourseSupabaseService();
+  final repository = CourseRepository(dataSource);
 
   runApp(
     ChangeNotifierProvider(
